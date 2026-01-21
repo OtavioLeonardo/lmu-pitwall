@@ -1,44 +1,14 @@
 [
     {
-        "text": "Sebring_Q3_Telemetry.csv",
-        "link": "data/sebring_telemetry.html",
+        "text": "油量计算",
+        "link": "lmu-pitwall/data/lmu_fuel.html",
         "tag": "OPEN",
         "isArchive": false
     },
     {
-        "text": "Portimao_Fuel_Calc_v1.2",
-        "link": "data/fuel_calculator.html",
+        "text": "LMU 赛道圈速全览",
+        "link": "lmu-pitwall/data/lmu_laptimes.html",
         "tag": "OPEN",
         "isArchive": false
     },
-    {
-        "text": "LMU_Laptimes_Database",
-        "link": "data/laptimes.html",
-        "tag": "OPEN",
-        "isArchive": false
-    },
-    {
-        "text": "Ferrari_499P_BoP_Table",
-        "link": "#",
-        "tag": "OPEN",
-        "isArchive": false
-    },
-    {
-        "text": "Spa_Wet_Tire_Wear_Log",
-        "link": "#",
-        "tag": "OPEN",
-        "isArchive": false
-    },
-    {
-        "text": "Imola_Setup_Baseline",
-        "link": "#",
-        "tag": "ARCHIVE",
-        "isArchive": true
-    },
-    {
-        "text": "Old_Tire_Data_2024",
-        "link": "#",
-        "tag": "ARCHIVE",
-        "isArchive": true
-    }
 ]
