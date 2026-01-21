@@ -1,0 +1,77 @@
+[
+    {
+        "category": "SETUP_ENGINEERING",
+        "items": [
+            {
+                "name": "Popometer",
+                "url": "https://popometer.io",
+                "color": "cyan"
+            },
+            {
+                "name": "Setup Shop",
+                "url": "#",
+                "color": "cyan"
+            },
+            {
+                "name": "Fuel Calc",
+                "url": "#",
+                "color": "cyan"
+            }
+        ]
+    },
+    {
+        "category": "RACE_CONTROL",
+        "items": [
+            {
+                "name": "WEC Official",
+                "url": "https://www.fiawec.com",
+                "color": "white"
+            },
+            {
+                "name": "Discord",
+                "url": "#",
+                "color": "white"
+            },
+            {
+                "name": "Schedule",
+                "url": "#",
+                "color": "white"
+            }
+        ]
+    },
+    {
+        "category": "TELEMETRY_ANALYSIS",
+        "items": [
+            {
+                "name": "Motec",
+                "url": "#",
+                "color": "gold"
+            },
+            {
+                "name": "LFM Stats",
+                "url": "#",
+                "color": "gold"
+            },
+            {
+                "name": "Swap",
+                "url": "#",
+                "color": "gold"
+            }
+        ]
+    },
+    {
+        "category": "ARCHIVED_TOOLS (Hidden in Dash)",
+        "items": [
+            {
+                "name": "Old Tool 1",
+                "url": "#",
+                "color": "gray"
+            },
+            {
+                "name": "Old Tool 2",
+                "url": "#",
+                "color": "gray"
+            }
+        ]
+    }
+]

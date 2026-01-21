@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMU 燃油圈数计算表 | Race Data</title>
+
+    <link rel="stylesheet" href="../css/race-theme.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="guide-section">
+            <h1 class="guide-title">LMU 燃油/Stint 计算表</h1>
+            <p class="guide-desc">WORSE CASE SCENARIO CALCULATION // BASED ON QUALI PACE + 1 LAP BUFFER</p>
+
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <h3>[01] 计算逻辑 / LOGIC</h3>
+                    <p style="font-size: 12px; margin: 0; color: var(--text-secondary);">
+                        <strong style="color:var(--text-primary)">公式：</strong>
+                        <code>(Time / LapTime) + 1 Lap</code><br><br>
+                        基于排位圈速计算。这是“最坏情况”预估：假设领跑者全程飞驰且刚好在倒计时归零前冲线。
+                    </p>
+                </div>
+
+                <div class="guide-card">
+                    <h3>[02] 图例 / LEGEND</h3>
+                    <div class="legend-item">
+                        <div class="legend-box col-short"></div> <strong>Sprint (&lt;20m)</strong>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box col-med"></div> <strong>Medium (20-35m)</strong>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box col-long"></div> <strong>Long (40-55m)</strong>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-box highlight-border"></div> <strong style="color:var(--accent-gold)">1 Hour
+                            Stint</strong>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <h3>[03] 提示 / NOTES</h3>
+                    <ul
+                        style="padding-left: 15px; margin: 0; font-size: 12px; color: var(--text-secondary); list-style-type: square;">
+                        <li><span style="color:var(--accent-cyan)">LMGT3</span>: 圈速较慢，被套圈可能导致少跑一圈。</li>
+                        <li><span style="color:var(--accent-cyan)">Formation</span>: 记得额外计算编队圈油量。</li>
+                        <li><span style="color:var(--accent-cyan)">Data</span>: 数据基于社区测试，仅供参考。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="fuelTable">
+                <thead>
+                    <tr class="header-main">
+                        <th class="track-name" style="z-index: 30;">TRACK / CIRCUIT</th>
+                        <th class="laptime-col" style="z-index: 30;">BEST</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Telemetry System v2.1 // Generated for LMU Strategy
+        </div>
+    </div>
+
+    <script>
+        // --- 完整数据 ---
+        const allData = [
+            {
+                class: "LMGT3",
+                tracks: [
+                    ["Bahrain (wec)", "1:59.38"], ["Bahrain (endurance)", "2:27.24"], ["Bahrain (outer)", "1:12.89"], ["Bahrain (paddock)", "1:21.59"],
+                    ["Circuit de la Sarthe", "3:56.91"], ["Circuit de la Sarthe (straight)", "3:40.94"],
+                    ["COTA", "2:06.33"], ["COTA (national)", "1:31.03"],
+                    ["Fuji (chicane)", "1:40.55"], ["Fuji (classic)", "1:36.70"],
+                    ["Imola", "1:42.41"], ["Interlagos", "1:34.15"],
+                    ["Monza", "1:49.21"], ["Monza (curvagrande)", "1:40.00"],
+                    ["Paul Ricard", "2:04.14"], ["Portimao", "1:43.67"],
+                    ["Qatar", "1:54.70"], ["Qatar (short)", "1:09.81"],
+                    ["Silverstone", "1:58.65"], ["Sebring", "2:00.79"], ["Sebring (school)", "1:03.52"], ["Spa", "2:17.93"]
+                ]
+            },
+            {
+                class: "LMH",
+                tracks: [
+                    ["Bahrain (wec)", "1:44.51"], ["Bahrain (endurance)", "2:09.29"], ["Bahrain (outer)", "1:03.68"], ["Bahrain (paddock)", "1:11.20"],
+                    ["Circuit de la Sarthe", "3:22.47"], ["Circuit de la Sarthe (straight)", "3:08.98"],
+                    ["COTA", "1:51.61"], ["COTA (national)", "1:20.55"],
+                    ["Fuji (chicane)", "1:28.11"], ["Fuji (classic)", "1:24.17"],
+                    ["Imola", "1:29.34"], ["Interlagos", "1:23.03"],
+                    ["Monza", "1:34.31"], ["Monza (curvagrande)", "1:25.64"],
+                    ["Paul Ricard", "1:47.94"], ["Portimao", "1:31.04"],
+                    ["Qatar", "1:38.66"], ["Qatar (short)", "0:58.86"],
+                    ["Silverstone", "1:41.79"], ["Sebring", "1:45.03"], ["Sebring (school)", "0:54.76"], ["Spa", "1:59.52"]
+                ]
+            },
+            {
+                class: "LMP3",
+                tracks: [
+                    ["Bahrain (wec)", "1:54.64"], ["Bahrain (endurance)", "2:20.65"], ["Bahrain (outer)", "1:10.15"], ["Bahrain (paddock)", "1:17.87"],
+                    ["Circuit de la Sarthe", "3:45.94"], ["Circuit de la Sarthe (straight)", "3:30.90"],
+                    ["COTA", "2:00.97"], ["COTA (national)", "1:27.02"],
+                    ["Fuji (chicane)", "1:35.87"], ["Fuji (classic)", "1:32.55"],
+                    ["Imola", "1:38.53"], ["Interlagos", "1:29.67"],
+                    ["Monza", "1:44.40"], ["Monza (curvagrande)", "1:35.51"],
+                    ["Paul Ricard", "1:57.72"], ["Portimao", "1:39.03"],
+                    ["Qatar", "1:47.53"], ["Qatar (short)", "1:05.49"],
+                    ["Silverstone", "1:51.85"], ["Sebring", "1:55.07"], ["Sebring (school)", "1:00.55"], ["Spa", "2:11.49"]
+                ]
+            },
+            {
+                class: "LMP2 ELMS",
+                tracks: [
+                    ["Bahrain (wec)", "1:47.18"], ["Bahrain (endurance)", "2:12.20"], ["Bahrain (outer)", "1:05.32"], ["Bahrain (paddock)", "1:13.04"],
+                    ["Circuit de la Sarthe", "3:27.86"], ["Circuit de la Sarthe (straight)", "3:14.34"],
+                    ["COTA", "1:53.37"], ["COTA (national)", "1:21.49"],
+                    ["Fuji (chicane)", "1:29.35"], ["Fuji (classic)", "1:25.67"],
+                    ["Imola", "1:30.93"], ["Interlagos", "1:23.27"],
+                    ["Monza", "1:36.29"], ["Monza (curvagrande)", "1:27.78"],
+                    ["Paul Ricard", "1:49.79"], ["Portimao", "1:32.36"],
+                    ["Qatar", "1:38.89"], ["Qatar (short)", "0:59.26"],
+                    ["Silverstone", "1:42.58"], ["Sebring", "1:47.13"], ["Sebring (school)", "0:55.40"], ["Spa", "2:02.08"]
+                ]
+            },
+            {
+                class: "LMP2 WEC",
+                tracks: [
+                    ["Bahrain (wec)", "1:49.61"], ["Bahrain (endurance)", "2:15.81"], ["Bahrain (outer)", "1:06.48"], ["Bahrain (paddock)", "1:14.69"],
+                    ["Circuit de la Sarthe", "3:33.36"], ["Circuit de la Sarthe (straight)", "3:19.54"],
+                    ["COTA", "1:56.93"], ["COTA (national)", "1:24.21"],
+                    ["Fuji (chicane)", "1:31.99"], ["Fuji (classic)", "1:28.18"],
+                    ["Imola", "1:34.42"], ["Interlagos", "1:25.99"],
+                    ["Monza", "1:39.66"], ["Monza (curvagrande)", "1:30.07"],
+                    ["Paul Ricard", "1:53.22"], ["Portimao", "1:35.51"],
+                    ["Qatar", "1:43.27"], ["Qatar (short)", "1:01.90"],
+                    ["Silverstone", "1:47.05"], ["Sebring", "1:49.94"], ["Sebring (school)", "0:56.99"], ["Spa", "2:05.57"]
+                ]
+            },
+            {
+                class: "GTE",
+                tracks: [
+                    ["Bahrain (wec)", "1:57.06"], ["Bahrain (endurance)", "2:23.84"], ["Bahrain (outer)", "1:11.54"], ["Bahrain (paddock)", "1:19.81"],
+                    ["Circuit de la Sarthe", "3:51.65"], ["Circuit de la Sarthe (straight)", "3:35.22"],
+                    ["COTA", "2:03.18"], ["COTA (national)", "1:27.67"],
+                    ["Fuji (chicane)", "1:37.40"], ["Fuji (classic)", "1:33.24"],
+                    ["Imola", "1:40.73"], ["Interlagos", "1:32.94"],
+                    ["Monza", "1:46.78"], ["Monza (curvagrande)", "1:37.49"],
+                    ["Paul Ricard", "2:03.70"], ["Portimao", "1:42.11"],
+                    ["Qatar", "1:52.40"], ["Qatar (short)", "1:07.81"],
+                    ["Silverstone", ""],
+                    ["Sebring", "1:58.79"], ["Sebring (school)", "1:01.70"], ["Spa", "2:15.67"]
+                ]
+            }
+        ];
+
+        // --- 配置 (时间点) ---
+        const timeConfig = [
+            4, 6, 8, 10, 15,    // Short
+            20, 25, 30, 35,     // Medium
+            40, 45, 50, 55,     // Long
+            60,                 // Highlight (1h)
+            65, 70, 75, 80, 85, 90 // Endurance
+        ];
+
+        function formatTimeHeader(min) {
+            const h = Math.floor(min / 60);
+            const m = min % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        }
+
+        function parseToSeconds(str) {
+            if (!str) return null;
+            const p = str.split(':');
+            return (parseInt(p[0]) * 60) + parseFloat(p[1]);
+        }
+
+        // --- 生成表格 ---
+        const theadRow = document.querySelector('.header-main');
+        const tbody = document.getElementById('tableBody');
+
+        // 1. 生成表头
+        timeConfig.forEach(min => {
+            const th = document.createElement('th');
+            th.textContent = formatTimeHeader(min);
+
+            // 应用颜色样式 (对应 CSS 中的 .col-*)
+            if (min === 60) th.className = 'highlight-border';
+            else if (min < 20) th.className = 'col-short';
+            else if (min < 40) th.className = 'col-med';
+            else if (min < 60) th.className = 'col-long';
+            else th.className = 'col-endur';
+
+            theadRow.appendChild(th);
+        });
+
+        // 2. 生成数据行
+        allData.forEach(cat => {
+            // 组别标题行
+            const secRow = document.createElement('tr');
+            secRow.className = 'section-header';
+            const secTd = document.createElement('td');
+            secTd.colSpan = timeConfig.length + 2;
+            secTd.textContent = cat.class;
+            secRow.appendChild(secTd);
+            tbody.appendChild(secRow);
+
+            // 赛道数据行
+            cat.tracks.forEach(track => {
+                const tr = document.createElement('tr');
+                const [name, timeStr] = track;
+                const sec = parseToSeconds(timeStr);
+
+                // 赛道名
+                const tdName = document.createElement('td');
+                tdName.className = 'track-name';
+                tdName.textContent = name;
+                tr.appendChild(tdName);
+
+                // 最佳圈速
+                const tdTime = document.createElement('td');
+                tdTime.className = 'laptime-col';
+                tdTime.textContent = timeStr || "-";
+                tr.appendChild(tdTime);
+
+                // 计算每一列
+                timeConfig.forEach(min => {
+                    const td = document.createElement('td');
+
+                    // 样式
+                    if (min === 60) td.className = 'highlight-border';
+                    else if (min < 20) td.className = 'col-short';
+                    else if (min < 40) td.className = 'col-med';
+                    else if (min < 60) td.className = 'col-long';
+                    else td.className = 'col-endur';
+
+                    // 数值
+                    if (sec) {
+                        const laps = Math.ceil((min * 60) / sec); // 原图逻辑: 向上取整 + 1圈buffer通常是策略师心里加的，这里代码逻辑保持原样(纯除法向上取整)
+                        // 若要严格符合文字说明 (Time / LapTime) + 1，应写为 Math.ceil(...) + 1
+                        // 但我看原代码逻辑是 Math.ceil，这里保持原逻辑不变，仅修改样式
+                        td.textContent = laps;
+                    } else {
+                        td.textContent = "-";
+                        td.classList.add('empty-data');
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>

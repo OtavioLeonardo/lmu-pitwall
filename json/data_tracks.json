@@ -1,0 +1,32 @@
+[
+    {
+        "track": "Circuit de la Sarthe",
+        "note": "LMU // 勒芒24小时重点: 必须省油",
+        "icon": "🏁",
+        "link": "#"
+    },
+    {
+        "track": "Spa-Francorchamps",
+        "note": "LMU // 红水弯全油门档位测试",
+        "icon": "🇧🇪",
+        "link": "#"
+    },
+    {
+        "track": "Monza",
+        "note": "LMU // T1 刹车点参考标记",
+        "icon": "🇮🇹",
+        "link": "#"
+    },
+    {
+        "track": "Fuji Speedway",
+        "note": "LMU // 最后一弯出弯循迹性",
+        "icon": "🇯🇵",
+        "link": "#"
+    },
+    {
+        "track": "Bahrain International",
+        "note": "LMU // 轮胎磨损极高注意保胎",
+        "icon": "🇧🇭",
+        "link": "#"
+    }
+]

@@ -1,0 +1,89 @@
+/* ========================================= */
+/* === LMU PITWALL THEME VARIABLES       === */
+/* ========================================= */
+:root {
+    /* --- 核心背景色 / Core Backgrounds --- */
+    --bg-core: #050505;
+    /* 页面主背景 (接近纯黑) */
+    --bg-panel: #0f0f0f;
+    /* 面板/卡片背景 */
+    --bg-card: #141414;
+    /* 深层卡片背景 */
+
+    /* --- 边框与分割线 / Borders --- */
+    --border-main: #333333;
+    --border-light: #444444;
+
+    /* --- 文字颜色 / Typography Colors --- */
+    --text-primary: #e5e5e5;
+    --text-secondary: #a3a3a3;
+    --text-muted: #666666;
+
+    /* --- 品牌功能色 / Brand Colors --- */
+    --accent-gold: #FFD700;
+    /* 警示/重点/冠军 */
+    --accent-cyan: #00BFFF;
+    /* 数据/链接/信息 */
+    --accent-red: #FF4500;
+    /* 错误/极限/刹车 */
+
+    /* ========================================= */
+    /* === 燃油表专用色 (Stint Durations)    === */
+    /* ========================================= */
+    /* Sprint (<20m) */
+    --stint-short-bg: #1a1a1a;
+    --stint-short-fg: #a3a3a3;
+
+    /* Medium (20-35m) */
+    --stint-med-bg: #0c2b3d;
+    /* 深蓝倾向 */
+    --stint-med-fg: #81d4fa;
+
+    /* Long (40-55m) */
+    --stint-long-bg: #0b3d15;
+    /* 深绿倾向 */
+    --stint-long-fg: #a5d6a7;
+
+    /* Endurance (60m+) */
+    --stint-endur-bg: #2d2d2d;
+    --stint-endur-fg: #ffffff;
+
+    /* 1 Hour Highlight */
+    --stint-1h-bg: #3d2c0b;
+    /* 深金倾向 */
+    --stint-1h-border: #FFD700;
+
+    /* ========================================= */
+    /* === 圈速等级专用色 (Pace Ratings)     === */
+    /* ========================================= */
+    /* Alien (~100%) - 紫色神圣感 */
+    --pace-alien-bg: #4a148c;
+    --pace-alien-fg: #e1bee7;
+
+    /* Competitive (101%) - 赛道蓝 */
+    --pace-comp-bg: #01579b;
+    --pace-comp-fg: #b3e5fc;
+
+    /* Good (102%) - 绿色健康 */
+    --pace-good-bg: #1b5e20;
+    --pace-good-fg: #c8e6c9;
+
+    /* Good 2 (103%) - 深橄榄绿 */
+    --pace-good2-bg: #33691e;
+    --pace-good2-fg: #dcedc8;
+
+    /* Midpack (104%) - 暗黄色 */
+    --pace-mid-bg: #f57f17;
+    --pace-mid-fg: #fffde7;
+
+    /* Tail (106%+) - 暗红色/棕色 */
+    --pace-tail-bg: #3e2723;
+    --pace-tail-fg: #ffccbc;
+
+    /* Off Pace - 灰色 */
+    --pace-off-bg: #212121;
+    --pace-off-fg: #757575;
+
+    /* --- 字体栈 / Font Stack --- */
+    --font-stack: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", monospace;
+}

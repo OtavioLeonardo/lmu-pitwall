@@ -1,0 +1,358 @@
+/* ========================================= */
+/* === GLOBAL LAYOUT & TYPOGRAPHY        === */
+/* ========================================= */
+body {
+    font-family: var(--font-stack);
+    font-size: 13px;
+    background-color: var(--bg-core);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    max-width: 100%;
+    margin: 0 auto;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-main);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 4px;
+    border-radius: 2px;
+    color: var(--accent-gold);
+}
+
+/* ========================================= */
+/* === GUIDE / HEADER SECTION            === */
+/* ========================================= */
+.guide-section {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-main);
+    background: linear-gradient(to bottom, var(--bg-card), var(--bg-panel));
+}
+
+.guide-title {
+    margin-top: 0;
+    color: var(--text-primary);
+    font-size: 20px;
+    text-transform: uppercase;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.guide-title::before {
+    content: "///";
+    color: var(--accent-gold);
+    font-weight: 900;
+}
+
+.guide-desc {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+}
+
+.guide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.guide-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-main);
+    padding: 12px 16px;
+    border-radius: 2px;
+}
+
+.guide-card h3 {
+    margin-top: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent-cyan);
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-main);
+    padding-bottom: 6px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.legend-box {
+    width: 12px;
+    height: 12px;
+    margin-right: 10px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ========================================= */
+/* === TABLE STYLES                      === */
+/* ========================================= */
+.table-wrapper {
+    overflow-x: auto;
+    max-height: 85vh;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) var(--bg-core);
+}
+
+/* Custom Scrollbar */
+.table-wrapper::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: var(--bg-core);
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: var(--border-light);
+    border-radius: 4px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    white-space: nowrap;
+    margin-bottom: 40px;
+    /* Spacing between multiple tables */
+}
+
+th,
+td {
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--border-main);
+    border-right: 1px solid var(--border-main);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Sticky Headers Logic --- */
+thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+/* Section Title (Used in Laptimes & Fuel Calc) */
+.section-title,
+.section-header td {
+    background-color: var(--bg-card);
+    /* was #1a1a1a */
+    color: var(--accent-gold);
+    /* Updated to Gold for consistency */
+    font-size: 14px;
+    font-weight: 900;
+    text-align: left;
+    padding: 12px 20px;
+    letter-spacing: 2px;
+    border-bottom: 2px solid var(--accent-gold);
+    position: sticky;
+    left: 0;
+    z-index: 15;
+}
+
+/* Support both naming conventions if necessary, simplified above */
+.section-header td::before {
+    content: ":: ";
+    color: var(--accent-red);
+}
+
+/* Main Header Row */
+.header-main th {
+    background-color: var(--bg-core);
+    color: var(--accent-cyan);
+    border-bottom: 1px solid var(--border-light);
+    padding: 10px 6px;
+    font-weight: bold;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+/* Sub Header Row (Used in Laptimes) */
+.header-sub th {
+    background-color: #1a1a1a;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: normal;
+    border-bottom: 2px solid var(--border-light);
+    padding: 6px;
+}
+
+/* --- Sticky Columns (Track Name & Laptime) --- */
+.track-name {
+    position: sticky;
+    left: 0;
+    background-color: var(--bg-panel);
+    z-index: 10;
+    text-align: left;
+    padding-left: 12px;
+    border-right: 2px solid var(--border-light);
+    color: var(--text-primary);
+    font-weight: bold;
+    min-width: 140px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+}
+
+.laptime-col {
+    position: sticky;
+    left: 152px;
+    /* Needs adjustment based on track-name width */
+    background-color: var(--bg-panel);
+    z-index: 10;
+    border-right: 2px solid var(--border-light);
+    color: var(--accent-gold);
+    font-weight: normal;
+    width: 60px;
+    font-size: 12px;
+}
+
+/* --- Hover Effects --- */
+tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    filter: brightness(1.1);
+    cursor: crosshair;
+}
+
+/* Ensure sticky columns get hover color too */
+tbody tr:hover .track-name,
+tbody tr:hover .laptime-col {
+    background-color: #1f1f1f;
+}
+
+/* ========================================= */
+/* === UTILITY CLASSES (Data Specific)   === */
+/* ========================================= */
+
+/* General Data */
+.empty-data {
+    color: var(--border-main);
+    font-style: italic;
+}
+
+.patch {
+    color: var(--accent-cyan);
+    font-size: 11px;
+    font-family: monospace;
+}
+
+.hotlap {
+    color: var(--accent-gold);
+    font-weight: bold;
+    border-right: 2px solid var(--border-light);
+}
+
+.car-name {
+    text-align: left;
+    padding-left: 15px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-style: italic;
+}
+
+/* Fuel / Stint Colors */
+.col-short {
+    background-color: var(--stint-short-bg);
+    color: var(--stint-short-fg);
+}
+
+.col-med {
+    background-color: var(--stint-med-bg);
+    color: var(--stint-med-fg);
+}
+
+.col-long {
+    background-color: var(--stint-long-bg);
+    color: var(--stint-long-fg);
+}
+
+.col-endur {
+    background-color: var(--stint-endur-bg);
+    color: var(--stint-endur-fg);
+}
+
+.highlight-border {
+    border-left: 1px solid var(--stint-1h-border);
+    border-right: 1px solid var(--stint-1h-border);
+    background-color: var(--stint-1h-bg);
+    color: var(--accent-gold);
+    font-weight: bold;
+}
+
+/* Pace Classes (Laptimes) */
+.pace-alien {
+    background-color: var(--pace-alien-bg);
+    color: var(--pace-alien-fg);
+    font-weight: bold;
+}
+
+.pace-comp {
+    background-color: var(--pace-comp-bg);
+    color: var(--pace-comp-fg);
+}
+
+.pace-good {
+    background-color: var(--pace-good-bg);
+    color: var(--pace-good-fg);
+}
+
+.pace-good-2 {
+    background-color: var(--pace-good2-bg);
+    color: var(--pace-good2-fg);
+}
+
+.pace-mid {
+    background-color: var(--pace-mid-bg);
+    color: var(--pace-mid-fg);
+    font-weight: bold;
+    color: #000;
+}
+
+.pace-tail {
+    background-color: var(--pace-tail-bg);
+    color: var(--pace-tail-fg);
+}
+
+.pace-tail-2 {
+    background-color: var(--bg-core);
+    color: var(--text-muted);
+}
+
+.pace-off {
+    background-color: var(--pace-off-bg);
+    color: var(--pace-off-fg);
+}
+
+/* ========================================= */
+/* === FOOTER                            === */
+/* ========================================= */
+.footer {
+    text-align: center;
+    padding: 15px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background-color: var(--bg-panel);
+    border-top: 1px solid var(--border-main);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
