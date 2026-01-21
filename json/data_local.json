@@ -1,13 +1,13 @@
 [
     {
         "text": "赛道圈速全览",
-        "link": "lmu-pitwall/data/lmu_laptimes.html",
+        "link": "data/lmu_laptimes.html",
         "tag": "OPEN",
         "isArchive": false
     },
     {
         "text": "燃油圈数计算表",
-        "link": "lmu-pitwall/data/lmu_fuel.html",
+        "link": "data/lmu_fuel.html",
         "tag": "OPEN",
         "isArchive": false
     }
