@@ -1,38 +1,8 @@
 [
     {
-        "date": "2026.01.20",
-        "title": "LMU 排位赛失误复盘",
-        "class": "Hypercar",
-        "link": "#"
-    },
-    {
-        "date": "2026.01.15",
-        "title": "1.5版本物理更新体验报告",
-        "class": "Patch",
-        "link": "#"
-    },
-    {
-        "date": "2025.12.30",
-        "title": "富士6小时耐力赛策略表",
-        "class": "LMP2",
-        "link": "#"
-    },
-    {
-        "date": "2025.12.12",
-        "title": "力反馈参数设置分享",
-        "class": "Hardware",
-        "link": "#"
-    },
-    {
-        "date": "2025.11.08",
-        "title": "Sebring 颠簸路面调校",
-        "class": "LMP2",
-        "link": "#"
-    },
-    {
-        "date": "2025.10.01",
-        "title": "早期测试记录 (Archived)",
-        "class": "Old",
-        "link": "#"
+        "date": "2026.01.17",
+        "title": "BMW M4 Sebring 三日集训",
+        "class": "GT3",
+        "link": "logs/report-01.md"
     }
 ]
