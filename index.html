@@ -6,13 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LMU Pitwall | 模拟赛车指挥台</title>
 
-    <!-- 使用赛车旗 Emoji 作为图标 -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏁</text></svg>">
+    <!-- 1. [新增] 引入 marked.js 用于解析 Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- 本地开发指南: 请使用 Live Server 运行此文件，否则无法读取 JSON -->
+    <!-- 网站图标 -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏁</text></svg>">
 
     <script>
         tailwind.config = {
@@ -27,6 +29,7 @@
                     },
                     fontFamily: {
                         'mono': ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                        'sans': ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
                     }
                 }
             }
@@ -63,7 +66,6 @@
             z-index: 40;
         }
 
-        /* 核心逻辑：只显示前 5 个项目，多余的隐藏（仅在非弹窗模式下生效） */
         .limit-items>*:nth-child(n+6) {
             display: none;
         }
@@ -78,12 +80,136 @@
             transform: scale(1);
             transition: all 0.2s ease-out;
         }
+
+        /* 2. [新增] Markdown 内容的专属样式 (深色赛车风) */
+        .markdown-body {
+            font-family: 'system-ui', sans-serif;
+            /* 正文用无衬线体更易读 */
+            color: #d4d4d4;
+            line-height: 1.7;
+        }
+
+        .markdown-body h1 {
+            font-size: 1.8em;
+            font-weight: 800;
+            color: #FFD700;
+            margin-bottom: 0.8em;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.3em;
+            letter-spacing: -0.02em;
+        }
+
+        .markdown-body h2 {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #00BFFF;
+            margin-top: 1.5em;
+            margin-bottom: 0.6em;
+        }
+
+        .markdown-body h3 {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #fff;
+            margin-top: 1.2em;
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-body p {
+            margin-bottom: 1em;
+        }
+
+        .markdown-body ul {
+            list-style: disc;
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+            color: #a3a3a3;
+        }
+
+        .markdown-body ol {
+            list-style: decimal;
+            padding-left: 1.5em;
+            margin-bottom: 1em;
+            color: #a3a3a3;
+        }
+
+        .markdown-body li {
+            margin-bottom: 0.3em;
+        }
+
+        .markdown-body strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .markdown-body em {
+            color: #00BFFF;
+            font-style: italic;
+        }
+
+        .markdown-body blockquote {
+            border-left: 4px solid #FFD700;
+            padding-left: 1em;
+            margin: 1.5em 0;
+            color: #888;
+            font-style: italic;
+            background: rgba(255, 215, 0, 0.05);
+            padding: 10px;
+        }
+
+        .markdown-body code {
+            background: #222;
+            color: #FFD700;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .markdown-body pre {
+            background: #111;
+            padding: 1em;
+            overflow-x: auto;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 1.5em;
+        }
+
+        .markdown-body pre code {
+            background: transparent;
+            padding: 0;
+            color: #ccc;
+        }
+
+        .markdown-body hr {
+            border: 0;
+            border-top: 1px solid #333;
+            margin: 2em 0;
+        }
+
+        .markdown-body img {
+            max-width: 100%;
+            border-radius: 4px;
+            border: 1px solid #333;
+            margin: 1em 0;
+        }
+
+        .markdown-body a {
+            color: #00BFFF;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .markdown-body a:hover {
+            color: #fff;
+        }
     </style>
 </head>
 
 <body
     class="bg-race-bg text-gray-300 font-mono min-h-screen p-4 md:p-8 selection:bg-telemetry-cyan selection:text-black relative">
 
+    <!-- 顶部状态栏 -->
     <header
         class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 border-b border-race-border pb-4 z-10 relative">
         <div>
@@ -97,7 +223,7 @@
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 <span class="text-green-500">SYSTEM ONLINE</span>
             </div>
-            <div class="text-gray-500">SESSION: <span class="text-telemetry-cyan">JSON_LINKED</span></div>
+            <div class="text-gray-500">SESSION: <span class="text-telemetry-cyan">MD_READY</span></div>
         </div>
     </header>
 
@@ -119,7 +245,6 @@
                         d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
             </div>
-            <!-- JS将自动填充这里 -->
             <ul id="list-data" class="space-y-2 limit-items text-xs text-gray-500 italic">
                 <li>Loading JSON data...</li>
             </ul>
@@ -141,9 +266,7 @@
                         d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
             </div>
-            <div id="list-tools" class="space-y-4 limit-items text-xs text-gray-500 italic">
-                Loading JSON data...
-            </div>
+            <div id="list-tools" class="space-y-4 limit-items text-xs text-gray-500 italic">Loading JSON data...</div>
         </section>
 
         <!-- [03] TRACK NOTES -->
@@ -162,12 +285,11 @@
                         d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
             </div>
-            <div id="list-notes" class="flex flex-col gap-3 limit-items text-xs text-gray-500 italic">
-                Loading JSON data...
-            </div>
+            <div id="list-notes" class="flex flex-col gap-3 limit-items text-xs text-gray-500 italic">Loading JSON
+                data...</div>
         </section>
 
-        <!-- [04] DEBRIEF LOG -->
+        <!-- [04] DEBRIEF LOG (支持 Markdown) -->
         <section
             class="bg-race-panel border border-race-border p-5 rounded-sm shadow-lg hover:border-gray-500 transition-colors duration-300 flex flex-col h-full">
             <div onclick="openModal('DEBRIEF_LOG', 'list-logs')"
@@ -209,7 +331,7 @@
 
     <div class="scanline"></div>
 
-    <!-- 弹窗结构 -->
+    <!-- 弹窗 1: 通用列表弹窗 -->
     <div id="data-modal"
         class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-12 transition-opacity duration-300">
         <div class="bg-race-bg border border-race-border w-full max-w-4xl max-h-full flex flex-col shadow-2xl relative">
@@ -241,7 +363,38 @@
         </div>
     </div>
 
-    <!-- 核心逻辑：数据获取与渲染 -->
+    <!-- 弹窗 2: [新增] Markdown 阅读器弹窗 -->
+    <div id="reader-modal"
+        class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 transition-opacity duration-300">
+        <div class="bg-race-bg border border-race-border w-full max-w-3xl max-h-full flex flex-col shadow-2xl relative">
+            <!-- 阅读器顶部 -->
+            <div
+                class="flex justify-between items-center p-5 border-b border-race-border bg-race-panel sticky top-0 z-10">
+                <div class="pr-4 flex-1">
+                    <h2 id="reader-title"
+                        class="text-lg md:text-xl text-white font-bold uppercase italic tracking-tighter truncate">
+                        <!-- JS 填充标题 -->
+                    </h2>
+                    <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">DEBRIEF_LOG // MARKDOWN_VIEWER</p>
+                </div>
+                <button onclick="closeReader()"
+                    class="text-gray-500 hover:text-white hover:bg-red-900/30 p-2 rounded transition-colors shrink-0 border border-transparent hover:border-red-500/50">
+                    <span class="text-xs font-bold uppercase mr-2 hidden md:inline">CLOSE [ESC]</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <!-- 阅读器内容 -->
+            <div class="p-6 overflow-y-auto flex-1 bg-black/50">
+                <!-- 文章内容将会渲染在这里 -->
+                <div id="reader-content" class="markdown-body"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 1. 数据加载器
         async function loadJSON(url, containerId, renderFunction) {
@@ -250,7 +403,7 @@
                 const response = await fetch(url);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
-                container.innerHTML = ''; // 清空加载提示
+                container.innerHTML = '';
                 renderFunction(data, container);
             } catch (e) {
                 console.error("Loading failed:", e);
@@ -258,83 +411,85 @@
             }
         }
 
-        // 2. 渲染模板函数 (Templates)
-
-        // [01] Local Data 渲染
+        // 2. 渲染模板
         function renderLocal(data, container) {
             data.forEach(item => {
                 const li = document.createElement('li');
                 const textColor = item.isArchive ? 'text-gray-500' : 'text-white';
                 const tagColor = item.isArchive ? 'text-gray-600' : 'text-telemetry-gold';
-
                 li.innerHTML = `
                     <a href="${item.link}" class="group flex items-center justify-between p-2 hover:bg-white/5 border-l-2 border-transparent hover:border-telemetry-gold transition-all cursor-pointer">
                         <span class="text-sm group-hover:text-white ${textColor}">${item.text}</span>
                         <span class="text-xs font-bold ${tagColor}">[${item.tag}]</span>
-                    </a>
-                `;
+                    </a>`;
                 container.appendChild(li);
             });
         }
 
-        // [02] Tools 渲染
         function renderTools(data, container) {
-            const colorMap = {
-                'cyan': 'hover:bg-telemetry-cyan',
-                'gold': 'hover:bg-telemetry-gold',
-                'white': 'hover:bg-white',
-                'gray': 'hover:bg-gray-600 text-gray-400 hover:text-white'
-            };
-
+            const colorMap = { 'cyan': 'hover:bg-telemetry-cyan', 'gold': 'hover:bg-telemetry-gold', 'white': 'hover:bg-white', 'gray': 'hover:bg-gray-600 text-gray-400 hover:text-white' };
             data.forEach(group => {
                 const div = document.createElement('div');
                 let linksHtml = '';
-
                 group.items.forEach(tool => {
                     const hoverClass = colorMap[tool.color] || 'hover:bg-white';
-                    linksHtml += `
-                        <a href="${tool.url}" target="_blank" class="bg-gray-800 ${hoverClass} hover:text-black text-center py-2 px-1 text-xs rounded transition-colors duration-200">
-                            ${tool.name}
-                        </a>
-                    `;
+                    linksHtml += `<a href="${tool.url}" target="_blank" class="bg-gray-800 ${hoverClass} hover:text-black text-center py-2 px-1 text-xs rounded transition-colors duration-200">${tool.name}</a>`;
                 });
-
-                div.innerHTML = `
-                    <h3 class="text-xs text-gray-500 mb-2 font-bold uppercase">:: ${group.category}</h3>
-                    <div class="grid grid-cols-3 gap-2">
-                        ${linksHtml}
-                    </div>
-                `;
+                div.innerHTML = `<h3 class="text-xs text-gray-500 mb-2 font-bold uppercase">:: ${group.category}</h3><div class="grid grid-cols-3 gap-2">${linksHtml}</div>`;
                 container.appendChild(div);
             });
         }
 
-        // [03] Tracks 渲染
+        // [修改] renderTracks: 增加视频链接按钮支持
         function renderTracks(data, container) {
             data.forEach(t => {
-                const a = document.createElement('a');
-                a.href = t.link;
-                a.className = "block group";
-                a.innerHTML = `
-                    <div class="flex items-center gap-4 bg-gray-900/50 p-3 border border-race-border hover:border-telemetry-cyan transition-all">
-                        <div class="text-2xl grayscale group-hover:grayscale-0 transition-all">${t.icon}</div>
-                        <div>
-                            <h3 class="font-bold text-white text-sm group-hover:text-telemetry-cyan">${t.track}</h3>
-                            <p class="text-xs text-gray-500 mt-1">${t.note}</p>
-                        </div>
-                        <div class="ml-auto text-xs text-gray-700 font-bold group-hover:text-telemetry-cyan">>>></div>
-                    </div>
-                `;
-                container.appendChild(a);
+                // 1. 改用 div 作为容器，以便处理嵌套链接
+                const div = document.createElement('div');
+                div.className = "relative group block"; // relative 用于定位内部的绝对定位链接
+
+                // 2. 准备视频按钮 HTML (检查 json 中是否有 videoLink)
+                // 使用 z-20 确保按钮位于卡片覆盖链接之上
+                // onclick="event.stopPropagation()" 防止点击视频时触发卡片跳转
+                const videoBtn = t.videoLink ? `
+            <a href="${t.videoLink}" target="_blank"
+               class="relative z-20 flex items-center justify-center w-6 h-6 text-gray-600 bg-gray-800/80 rounded hover:bg-red-600 hover:text-white transition-all duration-200"
+               title="观看参考视频 (Bilibili)"
+               onclick="event.stopPropagation()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                </svg>
+            </a>
+        ` : '';
+
+                // 3. 构建卡片内容
+                div.innerHTML = `
+            <div class="flex items-center gap-4 bg-gray-900/50 p-3 border border-race-border group-hover:border-telemetry-cyan transition-all">
+                <div class="text-2xl grayscale group-hover:grayscale-0 transition-all">${t.icon}</div>
+                
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-white text-sm group-hover:text-telemetry-cyan truncate">${t.track}</h3>
+                    <p class="text-xs text-gray-500 mt-1 truncate">${t.note}</p>
+                </div>
+
+                <div class="ml-auto flex items-center gap-3">
+                    ${videoBtn}
+                    <div class="text-xs text-gray-700 font-bold group-hover:text-telemetry-cyan">>>></div>
+                </div>
+            </div>
+            
+            <a href="${t.link}" class="absolute inset-0 z-10" aria-label="Open Track Notes"></a>
+        `;
+                container.appendChild(div);
             });
         }
 
-        // [04] Logs 渲染
+        // [修改] renderLogs: 现在点击会打开 Markdown 阅读器
         function renderLogs(data, container) {
             data.forEach(log => {
                 const tr = document.createElement('tr');
                 tr.className = "group hover:bg-white/5 cursor-pointer transition-colors border-b border-gray-800/50";
-                tr.onclick = () => window.location.href = log.link;
+                // 点击时调用 openReader，传入 markdown 文件的路径和标题
+                tr.onclick = () => openReader(log.link, log.title);
                 tr.innerHTML = `
                     <td class="py-3 text-gray-500 font-bold text-xs">${log.date}</td>
                     <td class="py-3 pl-2 text-gray-300 group-hover:text-telemetry-gold">${log.title}</td>
@@ -344,7 +499,7 @@
             });
         }
 
-        // 3. 初始化: 页面加载时抓取数据
+        // 3. 初始化
         window.addEventListener('DOMContentLoaded', () => {
             loadJSON('json/data_local.json', 'list-data', renderLocal);
             loadJSON('json/data_tools.json', 'list-tools', renderTools);
@@ -352,7 +507,7 @@
             loadJSON('json/data_logs.json', 'list-logs', renderLogs);
         });
 
-        // 4. 弹窗逻辑 (保持不变，但现在处理的是动态内容)
+        // 4. 通用列表弹窗逻辑
         const modal = document.getElementById('data-modal');
         const modalTitle = document.getElementById('modal-title');
         const modalContent = document.getElementById('modal-content-area');
@@ -360,23 +515,13 @@
         function openModal(title, sourceId) {
             modalTitle.innerHTML = `<span class="text-telemetry-gold">///</span> ${title}_FULL_VIEW`;
             const sourceElement = document.getElementById(sourceId);
-
             if (sourceElement) {
                 const contentClone = sourceElement.cloneNode(true);
-                contentClone.classList.remove('limit-items'); // 移除限制，显示所有
-
+                contentClone.classList.remove('limit-items');
                 if (sourceElement.tagName === 'TBODY') {
                     const wrapperTable = document.createElement('table');
                     wrapperTable.className = 'w-full text-left border-collapse';
-                    wrapperTable.innerHTML = `
-                        <thead>
-                            <tr class="text-xs text-gray-600 border-b border-gray-800">
-                                <th class="pb-2 font-normal uppercase">Date</th>
-                                <th class="pb-2 font-normal uppercase">Entry Title</th>
-                                <th class="pb-2 font-normal text-right">Class</th>
-                            </tr>
-                        </thead>
-                    `;
+                    wrapperTable.innerHTML = `<thead><tr class="text-xs text-gray-600 border-b border-gray-800"><th class="pb-2 font-normal uppercase">Date</th><th class="pb-2 font-normal uppercase">Entry Title</th><th class="pb-2 font-normal text-right">Class</th></tr></thead>`;
                     wrapperTable.appendChild(contentClone);
                     modalContent.innerHTML = '';
                     modalContent.appendChild(wrapperTable);
@@ -393,8 +538,52 @@
             modal.classList.add('hidden');
         }
 
-        document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
+        // 5. [新增] Markdown 阅读器逻辑
+        async function openReader(fileUrl, title) {
+            const readerModal = document.getElementById('reader-modal');
+            const contentBox = document.getElementById('reader-content');
+            const titleBox = document.getElementById('reader-title');
+
+            // 设置标题
+            titleBox.textContent = title || 'LOG ENTRY';
+
+            // 显示加载状态
+            contentBox.innerHTML = '<div class="text-gray-500 animate-pulse font-mono">Initializing Decryption... (Fetching Data)</div>';
+
+            // 打开弹窗
+            readerModal.classList.remove('hidden');
+
+            try {
+                // 抓取 Markdown 文件内容
+                const response = await fetch(fileUrl);
+                if (!response.ok) throw new Error('File not found');
+                const text = await response.text();
+
+                // 使用 marked.js 解析并显示
+                contentBox.innerHTML = marked.parse(text);
+            } catch (err) {
+                contentBox.innerHTML = `<div class="text-red-500 font-mono">ERROR: UNABLE TO READ DATA LOG.<br>Please check file path: ${fileUrl}</div>`;
+            }
+        }
+
+        function closeReader() {
+            document.getElementById('reader-modal').classList.add('hidden');
+        }
+
+        // ESC 键关闭所有弹窗
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                closeModal();
+                closeReader();
+            }
+        });
+
+        // 点击背景关闭
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        document.getElementById('reader-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('reader-modal')) closeReader();
+        });
+
     </script>
 </body>
 
