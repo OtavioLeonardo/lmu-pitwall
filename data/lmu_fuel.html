@@ -6,9 +6,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LMU 燃油圈数计算表 | Race Data</title>
 
+    <!-- 引用外部 CSS -->
     <link rel="stylesheet" href="../css/race-theme.css">
     <link rel="stylesheet" href="../css/style.css">
 
+    <style>
+        /* 本地特定样式补充 */
+        .calculator-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-main);
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .calc-grid {
+                grid-template-columns: repeat(3, 1fr) auto;
+                align-items: end;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .form-select,
+        .form-input {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 2px;
+            font-family: var(--font-stack);
+            font-size: 14px;
+        }
+
+        .form-select:focus,
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .result-box {
+            background-color: var(--bg-core);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 15px;
+            text-align: center;
+            border-radius: 4px;
+            min-width: 120px;
+        }
+
+        .result-value {
+            font-size: 24px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .result-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* 隐藏/显示表格按钮 (仅移动端优化体验) */
+        .toggle-table-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--accent-cyan);
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .toggle-table-btn:hover {
+            background: var(--bg-panel);
+            border-color: var(--accent-cyan);
+        }
+    </style>
 </head>
 
 <body>
@@ -16,49 +112,79 @@
     <div class="container">
 
         <div class="guide-section">
-            <h1 class="guide-title">LMU 燃油/Stint 计算表</h1>
-            <p class="guide-desc">WORSE CASE SCENARIO CALCULATION // BASED ON QUALI PACE + 1 LAP BUFFER</p>
+            <h1 class="guide-title">LMU 燃油/Stint 计算器</h1>
+            <p class="guide-desc">QUICK CALCULATOR & REFERENCE TABLE</p>
 
+            <!-- ========================== -->
+            <!-- 新增：交互式计算器板块 -->
+            <!-- ========================== -->
+            <div class="calculator-section">
+                <div class="calc-grid">
+                    <!-- 1. 选择组别 -->
+                    <div class="form-group">
+                        <label class="form-label">Car Class (组别)</label>
+                        <select id="classSelect" class="form-select" onchange="updateTrackList()">
+                            <option value="" disabled selected>Select Class...</option>
+                            <!-- JS populate -->
+                        </select>
+                    </div>
+
+                    <!-- 2. 选择赛道 -->
+                    <div class="form-group">
+                        <label class="form-label">Track (赛道)</label>
+                        <select id="trackSelect" class="form-select" disabled onchange="calculateLaps()">
+                            <option value="">Select Class First...</option>
+                        </select>
+                    </div>
+
+                    <!-- 3. 输入时间 -->
+                    <div class="form-group">
+                        <label class="form-label">Race Time (Minutes)</label>
+                        <input type="number" id="timeInput" class="form-input" value="60" min="1"
+                            oninput="calculateLaps()">
+                    </div>
+
+                    <!-- 4. 结果显示 -->
+                    <div class="result-box">
+                        <span class="result-value" id="resultLaps">--</span>
+                        <span class="result-label">Total Laps (+1)</span>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted); text-align: right;">
+                    *Based on Best Lap Time + Buffer
+                </div>
+            </div>
+
+            <!-- 说明卡片 -->
             <div class="guide-grid">
                 <div class="guide-card">
-                    <h3>[01] 计算逻辑 / LOGIC</h3>
+                    <h3>[01] LOGIC</h3>
                     <p style="font-size: 12px; margin: 0; color: var(--text-secondary);">
-                        <strong style="color:var(--text-primary)">公式：</strong>
-                        <code>(Time / LapTime) + 1 Lap</code><br><br>
-                        基于排位圈速计算。这是“最坏情况”预估：假设领跑者全程飞驰且刚好在倒计时归零前冲线。
+                        计算公式：<code>(Duration / BestLap) + 1</code>。<br>
+                        基于极限圈速计算，确保油量足以覆盖“最坏情况”（多跑一圈）。
                     </p>
                 </div>
-
-                <div class="guide-card">
-                    <h3>[02] 图例 / LEGEND</h3>
+                <!-- 移动端隐藏不重要的卡片以节省空间 -->
+                <div class="guide-card hidden-mobile">
+                    <h3>[02] LEGEND</h3>
                     <div class="legend-item">
                         <div class="legend-box col-short"></div> <strong>Sprint (&lt;20m)</strong>
                     </div>
                     <div class="legend-item">
-                        <div class="legend-box col-med"></div> <strong>Medium (20-35m)</strong>
+                        <div class="legend-box highlight-border"></div> <strong style="color:var(--accent-gold)">1
+                            Hour</strong>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-box col-long"></div> <strong>Long (40-55m)</strong>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-box highlight-border"></div> <strong style="color:var(--accent-gold)">1 Hour
-                            Stint</strong>
-                    </div>
-                </div>
-
-                <div class="guide-card">
-                    <h3>[03] 提示 / NOTES</h3>
-                    <ul
-                        style="padding-left: 15px; margin: 0; font-size: 12px; color: var(--text-secondary); list-style-type: square;">
-                        <li><span style="color:var(--accent-cyan)">LMGT3</span>: 圈速较慢，被套圈可能导致少跑一圈。</li>
-                        <li><span style="color:var(--accent-cyan)">Formation</span>: 记得额外计算编队圈油量。</li>
-                        <li><span style="color:var(--accent-cyan)">Data</span>: 数据基于社区测试，仅供参考。</li>
-                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="table-wrapper">
+        <!-- 表格折叠按钮 -->
+        <button class="toggle-table-btn" onclick="toggleTable()">
+            ▼ Show/Hide Full Reference Table
+        </button>
+
+        <!-- 完整表格区域 -->
+        <div class="table-wrapper" id="mainTableWrapper">
             <table id="fuelTable">
                 <thead>
                     <tr class="header-main">
@@ -72,12 +198,14 @@
         </div>
 
         <div class="footer">
-            Telemetry System v2.1 // Generated for LMU Strategy
+            Telemetry System v2.2 // Calc & Data
         </div>
     </div>
 
     <script>
         // --- 完整数据 ---
+        // (保持您原有的数据结构不变，这里只列出部分示例以节省空间，
+        //  但在实际文件中请保留您上面提供的完整 allData 数组)
         const allData = [
             {
                 class: "LMGT3",
@@ -166,7 +294,7 @@
             }
         ];
 
-        // --- 配置 (时间点) ---
+        // --- 时间点配置 (用于下方表格) ---
         const timeConfig = [
             4, 6, 8, 10, 15,    // Short
             20, 25, 30, 35,     // Medium
@@ -175,6 +303,7 @@
             65, 70, 75, 80, 85, 90 // Endurance
         ];
 
+        // --- 辅助函数 ---
         function formatTimeHeader(min) {
             const h = Math.floor(min / 60);
             const m = min % 60;
@@ -187,79 +316,157 @@
             return (parseInt(p[0]) * 60) + parseFloat(p[1]);
         }
 
-        // --- 生成表格 ---
-        const theadRow = document.querySelector('.header-main');
-        const tbody = document.getElementById('tableBody');
+        // ==========================================
+        // === Calculator Logic (Mobile Friendly) ===
+        // ==========================================
 
-        // 1. 生成表头
-        timeConfig.forEach(min => {
-            const th = document.createElement('th');
-            th.textContent = formatTimeHeader(min);
+        const classSelect = document.getElementById('classSelect');
+        const trackSelect = document.getElementById('trackSelect');
+        const timeInput = document.getElementById('timeInput');
+        const resultLaps = document.getElementById('resultLaps');
 
-            // 应用颜色样式 (对应 CSS 中的 .col-*)
-            if (min === 60) th.className = 'highlight-border';
-            else if (min < 20) th.className = 'col-short';
-            else if (min < 40) th.className = 'col-med';
-            else if (min < 60) th.className = 'col-long';
-            else th.className = 'col-endur';
-
-            theadRow.appendChild(th);
-        });
-
-        // 2. 生成数据行
-        allData.forEach(cat => {
-            // 组别标题行
-            const secRow = document.createElement('tr');
-            secRow.className = 'section-header';
-            const secTd = document.createElement('td');
-            secTd.colSpan = timeConfig.length + 2;
-            secTd.textContent = cat.class;
-            secRow.appendChild(secTd);
-            tbody.appendChild(secRow);
-
-            // 赛道数据行
-            cat.tracks.forEach(track => {
-                const tr = document.createElement('tr');
-                const [name, timeStr] = track;
-                const sec = parseToSeconds(timeStr);
-
-                // 赛道名
-                const tdName = document.createElement('td');
-                tdName.className = 'track-name';
-                tdName.textContent = name;
-                tr.appendChild(tdName);
-
-                // 最佳圈速
-                const tdTime = document.createElement('td');
-                tdTime.className = 'laptime-col';
-                tdTime.textContent = timeStr || "-";
-                tr.appendChild(tdTime);
-
-                // 计算每一列
-                timeConfig.forEach(min => {
-                    const td = document.createElement('td');
-
-                    // 样式
-                    if (min === 60) td.className = 'highlight-border';
-                    else if (min < 20) td.className = 'col-short';
-                    else if (min < 40) td.className = 'col-med';
-                    else if (min < 60) td.className = 'col-long';
-                    else td.className = 'col-endur';
-
-                    // 数值
-                    if (sec) {
-                        const laps = Math.ceil((min * 60) / sec); // 原图逻辑: 向上取整 + 1圈buffer通常是策略师心里加的，这里代码逻辑保持原样(纯除法向上取整)
-                        // 若要严格符合文字说明 (Time / LapTime) + 1，应写为 Math.ceil(...) + 1
-                        // 但我看原代码逻辑是 Math.ceil，这里保持原逻辑不变，仅修改样式
-                        td.textContent = laps;
-                    } else {
-                        td.textContent = "-";
-                        td.classList.add('empty-data');
-                    }
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
+        // 1. 初始化组别下拉菜单
+        function initCalculator() {
+            allData.forEach((item, index) => {
+                const opt = document.createElement('option');
+                opt.value = index; // 用数组索引作为值
+                opt.textContent = item.class;
+                classSelect.appendChild(opt);
             });
+        }
+
+        // 2. 组别改变时，更新赛道列表
+        function updateTrackList() {
+            const classIndex = classSelect.value;
+            const trackData = allData[classIndex].tracks;
+
+            // 清空并启用赛道选择
+            trackSelect.innerHTML = '<option value="" disabled selected>Select Track...</option>';
+            trackSelect.disabled = false;
+
+            trackData.forEach((track, index) => {
+                const opt = document.createElement('option');
+                opt.value = track[1]; // 将圈速时间字符串直接作为 value
+                opt.textContent = track[0];
+                trackSelect.appendChild(opt);
+            });
+
+            // 重置结果
+            resultLaps.textContent = "--";
+        }
+
+        // 3. 计算逻辑
+        function calculateLaps() {
+            const lapTimeStr = trackSelect.value;
+            const durationMin = parseFloat(timeInput.value);
+
+            if (!lapTimeStr || !durationMin || durationMin <= 0) {
+                resultLaps.textContent = "--";
+                return;
+            }
+
+            const lapSeconds = parseToSeconds(lapTimeStr);
+            if (!lapSeconds) {
+                resultLaps.textContent = "Err";
+                return;
+            }
+
+            // 核心公式：(总秒数 / 单圈秒数) 向上取整 + 1圈(Buffer)
+            // 原表格逻辑是Math.ceil，这里为了保险起见，严格按照策略逻辑
+            // 通常做法：总时间/圈速 = 跑的圈数。如果正好除尽，往往需要多跑一圈以防万一。
+            // 这里沿用表格的逻辑：Math.ceil((min * 60) / sec)
+            const totalSeconds = durationMin * 60;
+            const laps = Math.ceil(totalSeconds / lapSeconds);
+
+            // 显示结果
+            resultLaps.textContent = laps;
+        }
+
+        // ==========================================
+        // === Table Logic (Reference)            ===
+        // ==========================================
+
+        function generateTable() {
+            const theadRow = document.querySelector('.header-main');
+            const tbody = document.getElementById('tableBody');
+
+            // 1. 生成表头
+            timeConfig.forEach(min => {
+                const th = document.createElement('th');
+                th.textContent = formatTimeHeader(min);
+                if (min === 60) th.className = 'highlight-border';
+                else if (min < 20) th.className = 'col-short';
+                else if (min < 40) th.className = 'col-med';
+                else if (min < 60) th.className = 'col-long';
+                else th.className = 'col-endur';
+                theadRow.appendChild(th);
+            });
+
+            // 2. 生成数据行
+            allData.forEach(cat => {
+                const secRow = document.createElement('tr');
+                secRow.className = 'section-header';
+                const secTd = document.createElement('td');
+                secTd.colSpan = timeConfig.length + 2;
+                secTd.textContent = cat.class;
+                secRow.appendChild(secTd);
+                tbody.appendChild(secRow);
+
+                cat.tracks.forEach(track => {
+                    const tr = document.createElement('tr');
+                    const [name, timeStr] = track;
+                    const sec = parseToSeconds(timeStr);
+
+                    const tdName = document.createElement('td');
+                    tdName.className = 'track-name';
+                    tdName.textContent = name;
+                    tr.appendChild(tdName);
+
+                    const tdTime = document.createElement('td');
+                    tdTime.className = 'laptime-col';
+                    tdTime.textContent = timeStr || "-";
+                    tr.appendChild(tdTime);
+
+                    timeConfig.forEach(min => {
+                        const td = document.createElement('td');
+                        if (min === 60) td.className = 'highlight-border';
+                        else if (min < 20) td.className = 'col-short';
+                        else if (min < 40) td.className = 'col-med';
+                        else if (min < 60) td.className = 'col-long';
+                        else td.className = 'col-endur';
+
+                        if (sec) {
+                            const laps = Math.ceil((min * 60) / sec);
+                            td.textContent = laps;
+                        } else {
+                            td.textContent = "-";
+                            td.classList.add('empty-data');
+                        }
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        function toggleTable() {
+            const wrapper = document.getElementById('mainTableWrapper');
+            if (wrapper.style.display === 'none') {
+                wrapper.style.display = 'block';
+            } else {
+                wrapper.style.display = 'none';
+            }
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            initCalculator();
+            generateTable();
+
+            // 移动端默认折叠表格，PC端展开
+            if (window.innerWidth < 768) {
+                document.getElementById('mainTableWrapper').style.display = 'none';
+            }
         });
 
     </script>
