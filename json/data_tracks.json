@@ -1,32 +1,26 @@
 [
     {
-        "track": "Circuit de la Sarthe",
-        "note": "LMU // 勒芒24小时重点: 必须省油",
-        "icon": "🏁",
-        "link": "#"
+        "id": "sebring",
+        "track": "Sebring International Raceway",
+        "note": "LMU // 颠簸路段的极致控制考验",
+        "icon": "🇺🇸",
+        "link": "track_notes_editor.html?track=sebring",
+        "videoLink": "https://www.bilibili.com/video/BV1F9RPYREHx?vd_source=9e823bbaf059e4bf21d2e8ad9055bdee"
     },
     {
-        "track": "Spa-Francorchamps",
-        "note": "LMU // 红水弯全油门档位测试",
-        "icon": "🇧🇪",
-        "link": "#"
+        "id": "portimao",
+        "track": "Autódromo Internacional do Algarve",
+        "note": "LMU // 即将更新",
+        "icon": "🇵🇹",
+        "link": "track_notes_editor.html?track=portimo",
+        "videoLink": "https://www.bilibili.com/video/BV1YeEdzGE2x?vd_source=9e823bbaf059e4bf21d2e8ad9055bdee"
     },
     {
-        "track": "Monza",
-        "note": "LMU // T1 刹车点参考标记",
-        "icon": "🇮🇹",
-        "link": "#"
-    },
-    {
-        "track": "Fuji Speedway",
-        "note": "LMU // 最后一弯出弯循迹性",
-        "icon": "🇯🇵",
-        "link": "#"
-    },
-    {
-        "track": "Bahrain International",
-        "note": "LMU // 轮胎磨损极高注意保胎",
+        "id": "Bahrain_outer",
+        "track": "Bahrain International Circuit (outer)",
+        "note": "LMU // 即将更新",
         "icon": "🇧🇭",
-        "link": "#"
+        "link": "track_notes_editor.html?track=bahrain_outer",
+        "videoLink": "https://www.bilibili.com/video/BV1YeEdzGE2x?vd_source=9e823bbaf059e4bf21d2e8ad9055bdee"
     }
 ]
