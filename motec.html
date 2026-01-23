@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PitWall AI Pro - LMU Edition</title>
+
+    <!-- 引入库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+
+    <style>
+        /* ========================================= */
+        /* === THEME VARIABLES (From race-theme.css) === */
+        /* ========================================= */
+        :root {
+            /* --- 核心背景色 --- */
+            --bg-core: #050505;
+            /* 页面主背景 */
+            --bg-panel: #0f0f0f;
+            /* 面板背景 */
+            --bg-card: #141414;
+            /* 深层卡片背景 */
+
+            /* --- 边框 --- */
+            --border-main: #333333;
+            --border-light: #444444;
+
+            /* --- 文字颜色 --- */
+            --text-primary: #e5e5e5;
+            --text-secondary: #a3a3a3;
+            --text-muted: #666666;
+
+            /* --- 品牌功能色 --- */
+            --accent-gold: #FFD700;
+            /* 重点/冠军 */
+            --accent-cyan: #00BFFF;
+            /* 数据/链接 */
+            --accent-red: #FF4500;
+            /* 刹车/错误 */
+            --accent-green: #2ecc71;
+            /* 油门 */
+            --accent-orange: #e67e22;
+            /* 警告 */
+        }
+
+        /* ========================================= */
+        /* === GLOBAL STYLES === */
+        /* ========================================= */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            background-color: var(--bg-core);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+            line-height: 1.5;
+        }
+
+        /* === Header === */
+        header {
+            background: linear-gradient(to bottom, var(--bg-card), var(--bg-panel));
+            border-bottom: 1px solid var(--border-main);
+            padding: 0 20px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 18px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        h1 .brand {
+            color: var(--accent-gold);
+        }
+
+        .badge {
+            font-size: 10px;
+            background: var(--accent-gold);
+            color: #000;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 2px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--border-main);
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: #33ccff;
+            box-shadow: 0 0 8px rgba(0, 191, 255, 0.4);
+        }
+
+        /* === Layout === */
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            grid-template-rows: 60% 40%;
+            gap: 12px;
+            padding: 12px;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        /* === Cards === */
+        .card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-main);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-header {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-main);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-card);
+        }
+
+        .card-body {
+            flex-grow: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        /* Sidebar & Data Grid */
+        .sidebar {
+            grid-row: 1 / span 2;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--border-main);
+            border-bottom: 1px solid var(--border-main);
+        }
+
+        .data-cell {
+            background: var(--bg-panel);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .data-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .data-value {
+            font-size: 15px;
+            font-weight: bold;
+            font-family: 'Consolas', monospace;
+            color: var(--text-primary);
+        }
+
+        /* 目标参考值的小字 */
+        .data-target {
+            font-size: 9px;
+            margin-top: 4px;
+            padding: 2px 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        .val-good {
+            color: var(--accent-green);
+        }
+
+        .val-bad {
+            color: var(--accent-red);
+        }
+
+        .val-warn {
+            color: var(--accent-orange);
+        }
+
+        .val-neutral {
+            color: var(--accent-cyan);
+        }
+
+        /* 赛道选择器样式 */
+        .track-selector-container {
+            padding: 10px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-main);
+        }
+
+        select#track-selector {
+            width: 100%;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        select#track-selector:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .help-tip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: var(--text-muted);
+            pointer-events: none;
+            font-size: 14px;
+        }
+
+        .drag-active {
+            border: 2px dashed var(--accent-gold);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        #loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            z-index: 2000;
+            animation: loading 1s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* === FAB Button (AI) === */
+        .fab-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: flex-end;
+        }
+
+        .fab-main {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            border: 2px solid #000;
+            color: #000;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .fab-main:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .ai-menu {
+            margin-bottom: 15px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .fab-container:hover .ai-menu {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .ai-btn {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .ai-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                overflow: auto;
+            }
+
+            .card {
+                height: 300px;
+                flex-shrink: 0;
+            }
+
+            .sidebar {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loader"></div>
+    <input type="file" id="fileInput" accept=".csv" style="display:none">
+
+    <header>
+        <h1>🏁 <span class="brand">PITWALL</span> AI <span class="badge">V2.6</span></h1>
+        <div class="toolbar">
+            <button class="btn" onclick="resetZoom()">🔍 重置视图</button>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📂 导入数据</button>
+        </div>
+    </header>
+
+    <div class="layout" id="main-layout">
+        <div class="sidebar">
+            <!-- 赛道信息卡片 (新) -->
+            <div class="card" style="flex-shrink:0">
+                <div class="card-header">
+                    <span>赛道设定 (Track Setup)</span>
+                    <span id="track-type-badge" class="badge" style="background:#444; color:#fff">Select</span>
+                </div>
+
+                <!-- 手动选择器 -->
+                <div class="track-selector-container">
+                    <select id="track-selector">
+                        <option value="" disabled selected>-- 请选择赛道 --</option>
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+
+                <div
+                    style="padding: 10px; font-size: 12px; color: var(--text-secondary); line-height: 1.4; border-top: 1px solid var(--border-main);">
+                    <span id="track-desc">选择赛道以加载推荐数据基准...</span>
+                    <div style="margin-top:5px; color: var(--accent-gold); font-weight:bold" id="track-benchmark"></div>
+                </div>
+            </div>
+
+            <div class="card" style="flex-shrink:0">
+                <div class="card-header">驾驶表现分析</div>
+                <div class="data-grid">
+                    <div class="data-cell"><span class="data-label">圈速 (Lap Time)</span><span class="data-value"
+                            id="val-time">--</span></div>
+                    <div class="data-cell"><span class="data-label">极速 (Top Speed)</span><span class="data-value"
+                            id="val-top">--</span></div>
+
+                    <div class="data-cell">
+                        <span class="data-label">滑行占比 (Coast)</span>
+                        <span class="data-value" id="val-coast">--</span>
+                        <span class="data-target" id="target-coast">目标: --</span>
+                    </div>
+                    <div class="data-cell">
+                        <span class="data-label">循迹刹车 (Trail)</span>
+                        <span class="data-value" id="val-trail">--</span>
+                        <span class="data-target" id="target-trail">目标: --</span>
+                    </div>
+
+                    <div class="data-cell"><span class="data-label">油门平滑度</span><span class="data-value"
+                            id="val-smooth">--</span></div>
+                    <div class="data-cell"><span class="data-label">刹车平滑度</span><span class="data-value"
+                            id="val-brake-smooth">--</span></div>
+                </div>
+            </div>
+
+            <div class="card" style="flex-grow:1; min-height: 200px;">
+                <div class="card-header">
+                    <span>赛道热力图</span>
+                    <span style="font-size: 10px; color: var(--text-muted); font-weight: normal;">🔴 刹车 / 🟢 油门</span>
+                </div>
+                <div class="card-body"><canvas id="mapChart"></canvas></div>
+            </div>
+            <div class="card" style="height: 180px; flex-shrink:0">
+                <div class="card-header">摩擦圆 (G-Force)</div>
+                <div class="card-body"><canvas id="ggChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="card" style="grid-column: 2; grid-row: 1;">
+            <div class="card-header">
+                <span>速度 / 转速 / 挡位</span>
+                <span style="font-size:10px; opacity:0.7; color: var(--text-muted); font-weight: normal;">Alt + 滚轮缩放 |
+                    拖拽平移</span>
+            </div>
+            <div class="card-body">
+                <canvas id="mainChart"></canvas>
+                <div id="tip-main" class="help-tip">请导入 CSV 遥测数据文件</div>
+            </div>
+        </div>
+
+        <div class="card" style="grid-column: 2; grid-row: 2;">
+            <div class="card-header">车手输入 (Input Telemetry)</div>
+            <div class="card-body">
+                <canvas id="inputChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="fab-container">
+        <button class="fab-main" title="AI 分析">🤖</button>
+        <div class="ai-menu">
+            <div
+                style="font-size: 11px; color: var(--text-muted); margin-bottom: 5px; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px;">
+                点击自动复制指令并分屏：
+            </div>
+            <button class="ai-btn" onclick="askAI('yuanbao')">腾讯元宝</button>
+            <button class="ai-btn" onclick="askAI('deepseek')">DeepSeek</button>
+            <button class="ai-btn" onclick="askAI('kimi')">Kimi 助手</button>
+        </div>
+    </div>
+
+    <script>
+        let rawData = [];
+        let charts = {};
+        let meta = {};
+        let promptText = "";
+        let maxDistance = 0;
+        let mapRatio = 1;
+        let currentStats = null; // Store current analysis stats
+
+        // 获取 CSS 变量颜色
+        const style = getComputedStyle(document.body);
+        const colors = {
+            cyan: style.getPropertyValue('--accent-cyan').trim(),
+            gold: style.getPropertyValue('--accent-gold').trim(),
+            red: style.getPropertyValue('--accent-red').trim(),
+            green: style.getPropertyValue('--accent-green').trim(),
+            text: style.getPropertyValue('--text-secondary').trim(),
+            grid: style.getPropertyValue('--border-main').trim(),
+            warn: style.getPropertyValue('--accent-orange').trim()
+        };
+
+        // ==========================================
+        // === V2.6 赛道数据库 (Full Track DB) ===
+        // ==========================================
+        // 包含详细的 Trail Braking (TB) 和 Coasting (Coast) 推荐值
+        // 标杆圈速基于 GTE/GT3 级别参考
+        const TRACK_DB = {
+            'bahrain': { label: 'Bahrain (WEC)', type: 'Stop-Go/Traction', desc: '重刹区多，牵引力至关重要。', trail: [10, 18], coast: [2, 8], bench: '1:58.7' },
+            'bahrain_enduro': { label: 'Bahrain (Endurance)', type: 'Technical', desc: '超长多弯布局，节奏变换频繁。', trail: [10, 15], coast: [2, 10], bench: '2:26.5' },
+            'lemans': { label: 'Le Mans (Sarthe)', type: 'High Speed', desc: '极速圣地。直道极长，弯道少但关键。', trail: [5, 12], coast: [0, 5], bench: '3:55.7' },
+            'cota': { label: 'COTA (Austin)', type: 'Technical', desc: 'S1高速组合弯+S3低速技术弯，极其考验节奏。', trail: [12, 20], coast: [0, 8], bench: '2:05.7' },
+            'fuji': { label: 'Fuji Speedway', type: 'Mixed', desc: '超长直道 + 极其技术性的第3计时段。', trail: [8, 16], coast: [2, 10], bench: '1:36.2' },
+            'imola': { label: 'Imola', type: 'Technical/Kerbs', desc: '切路肩极其凶狠，急停急起。', trail: [10, 18], coast: [0, 6], bench: '1:41.9' },
+            'interlagos': { label: 'Interlagos', type: 'Flowing', desc: '逆时针赛道，中高速弯多，注重韵律。', trail: [8, 15], coast: [2, 10], bench: '1:33.6' },
+            'monza': { label: 'Monza', type: 'Power/Brake', desc: '速度殿堂。重刹效率和出弯开油是关键。', trail: [5, 12], coast: [0, 5], bench: '1:48.6' },
+            'paul_ricard': { label: 'Paul Ricard', type: 'Flat/Technical', desc: '极其平坦，缓冲区大，容易走大。', trail: [8, 15], coast: [2, 10], bench: '2:03.5' },
+            'portimao': { label: 'Portimao', type: 'Elevation/Blind', desc: '起伏剧烈，盲弯多，需利用重心转移。', trail: [12, 20], coast: [2, 8], bench: '1:43.1' },
+            'qatar': { label: 'Qatar', type: 'High Speed/Flow', desc: '极其平坦且快速，非常依赖侧向抓地力。', trail: [5, 12], coast: [5, 15], bench: '1:54.1' },
+            'silverstone': { label: 'Silverstone', type: 'High Aero', desc: '高速弯角著称，需要极高的空气动力学信心。', trail: [5, 12], coast: [2, 10], bench: '1:58.0' },
+            'sebring': { label: 'Sebring', type: 'Bumpy/Technical', desc: '极其颠簸。需要大量 Trail Braking 来压住车头。', trail: [12, 22], coast: [0, 6], bench: '2:00.1' },
+            'spa': { label: 'Spa-Francorchamps', type: 'Fast/Flowing', desc: 'Eau Rouge! 高速与节奏的完美结合。', trail: [6, 14], coast: [2, 8], bench: '2:17.2' },
+            'suzuka': { label: 'Suzuka', type: 'Technical/Flow', desc: '著名的8字形赛道，S弯极考研节奏。', trail: [8, 16], coast: [2, 10], bench: '1:58.0' },
+            'default': { label: 'Unknown / Custom', type: 'Balanced', desc: '综合型赛道标准。', trail: [5, 15], coast: [0, 12], bench: '--' }
+        };
+
+        // 初始化赛道选择器
+        function initTrackSelector() {
+            const selector = document.getElementById('track-selector');
+            // 按字母顺序排序
+            const keys = Object.keys(TRACK_DB).sort();
+
+            keys.forEach(key => {
+                if (key === 'default') return;
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = TRACK_DB[key].label;
+                selector.appendChild(opt);
+            });
+
+            // 添加通用选项
+            const defOpt = document.createElement('option');
+            defOpt.value = 'default';
+            defOpt.innerText = 'Custom / Other';
+            selector.appendChild(defOpt);
+
+            // 绑定事件
+            selector.addEventListener('change', (e) => {
+                updateTrackProfile(e.target.value);
+            });
+        }
+
+        // 初始化调用
+        initTrackSelector();
+
+        // 更新赛道特性逻辑
+        function updateTrackProfile(trackKey) {
+            const profile = TRACK_DB[trackKey] || TRACK_DB['default'];
+
+            // 更新 UI 描述
+            document.getElementById('track-type-badge').innerText = profile.type;
+            document.getElementById('track-desc').innerText = profile.desc;
+            document.getElementById('track-benchmark').innerText = profile.bench !== '--' ? `标杆圈速: ${profile.bench}` : '';
+
+            // 如果已经有数据，立即刷新分析结果
+            if (currentStats) {
+                currentStats.profile = profile; // 更新当前 profile
+                updateStatsUI(currentStats);    // 刷新颜色和目标值
+                generatePrompt(currentStats);   // 刷新 AI 指令
+            }
+        }
+
+        // 尝试根据文件名或 metadata 自动匹配
+        function autoSelectTrack(trackName) {
+            const selector = document.getElementById('track-selector');
+            if (!trackName) {
+                selector.value = 'default';
+                updateTrackProfile('default');
+                return;
+            }
+
+            const lowerName = trackName.toLowerCase();
+            let match = 'default';
+
+            // 遍历 DB 寻找匹配
+            for (const key in TRACK_DB) {
+                if (key === 'default') continue;
+                // 简单的包含匹配
+                if (lowerName.includes(key) || TRACK_DB[key].label.toLowerCase().includes(lowerName)) {
+                    match = key;
+                    break;
+                }
+            }
+
+            // 特殊处理 Bahrain 变体
+            if (lowerName.includes('bahrain')) {
+                if (lowerName.includes('endurance')) match = 'bahrain_enduro';
+                else match = 'bahrain';
+            }
+
+            selector.value = match;
+            updateTrackProfile(match);
+        }
+
+
+        const syncCharts = (chart) => {
+            const otherChartId = chart.canvas.id === 'mainChart' ? 'inputChart' : 'mainChart';
+            const otherChart = charts[otherChartId];
+            if (otherChart) {
+                const xScale = chart.scales.x;
+                otherChart.options.scales.x.min = xScale.min;
+                otherChart.options.scales.x.max = xScale.max;
+                otherChart.update('none');
+            }
+        };
+
+        const updateMapCursor = (e, elements, chart) => {
+            if (elements && elements.length > 0 && charts.map) {
+                const index = elements[0].index;
+                const point = rawData[index];
+                if (point && point['GPS Longitude'] && point['GPS Latitude']) {
+                    const cursorDatasetIndex = charts.map.data.datasets.length - 1;
+                    charts.map.data.datasets[cursorDatasetIndex].data = [{
+                        x: point['GPS Longitude'] * mapRatio,
+                        y: point['GPS Latitude']
+                    }];
+                    charts.map.update('none');
+                }
+            }
+        };
+
+        const getZoomOptions = () => ({
+            limits: { x: { min: 0, max: maxDistance, minRange: 50 } },
+            pan: {
+                enabled: true, mode: 'x', modifierKey: null, threshold: 5,
+                onPan: ({ chart }) => syncCharts(chart)
+            },
+            zoom: {
+                wheel: { enabled: true, modifierKey: 'alt', speed: 0.1 },
+                pinch: { enabled: true, onZoom: ({ chart }) => syncCharts(chart) },
+                mode: 'x',
+                onZoom: ({ chart }) => syncCharts(chart)
+            }
+        });
+
+        const commonOptions = {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            interaction: { mode: 'index', intersect: false },
+            elements: { point: { radius: 0 } },
+            scales: {
+                x: { display: false, type: 'linear' },
+                y: {
+                    grid: { color: colors.grid },
+                    ticks: { color: colors.text }
+                }
+            },
+            onHover: updateMapCursor,
+            plugins: {
+                legend: { labels: { color: colors.text } }
+            }
+        };
+
+        function resetZoom() {
+            if (charts.main) charts.main.resetZoom();
+            if (charts.input) charts.input.resetZoom();
+        }
+
+        const fileInput = document.getElementById('fileInput');
+        fileInput.onchange = (e) => { if (e.target.files.length) processFile(e.target.files[0]); };
+
+        const layout = document.getElementById('main-layout');
+        document.body.addEventListener('dragover', e => { e.preventDefault(); layout.classList.add('drag-active'); });
+        document.body.addEventListener('dragleave', e => { layout.classList.remove('drag-active'); });
+        document.body.addEventListener('drop', e => {
+            e.preventDefault(); layout.classList.remove('drag-active');
+            if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+        });
+
+        function processFile(file) {
+            document.getElementById('loader').style.display = 'block';
+            const reader = new FileReader();
+            reader.onload = (e) => parseCSV(e.target.result);
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            let headerIndex = -1;
+            meta = { track: 'Unknown', car: 'Unknown' };
+
+            for (let i = 0; i < 30; i++) {
+                if (!lines[i]) continue;
+                if (lines[i].includes('"Venue"')) meta.track = lines[i].split(',')[1].replace(/"/g, '');
+                if (lines[i].includes('"Vehicle"')) meta.car = lines[i].split(',')[1].replace(/"/g, '');
+                if (lines[i].includes('"Time"') && lines[i].includes('"Distance"')) { headerIndex = i; break; }
+            }
+
+            if (headerIndex === -1) { alert("文件格式错误"); return; }
+
+            Papa.parse(lines.slice(headerIndex).join('\n'), {
+                header: true, dynamicTyping: true, skipEmptyLines: true,
+                complete: (res) => {
+                    let clean = res.data;
+                    if (typeof clean[0]['Time'] === 'string') clean.shift();
+                    rawData = clean;
+                    maxDistance = rawData[rawData.length - 1]['Distance'];
+                    document.querySelectorAll('.help-tip').forEach(e => e.style.display = 'none');
+
+                    // 尝试自动选择赛道，如果不准用户可手动改
+                    autoSelectTrack(meta.track);
+
+                    updateDashboard();
+                    document.getElementById('loader').style.display = 'none';
+                }
+            });
+        }
+
+        function updateDashboard() {
+            renderCharts();
+            currentStats = analyzeDriving(); // Store global stats
+
+            // 确保 profile 已加载 (在 autoSelectTrack 中已设置，但以防万一)
+            const selector = document.getElementById('track-selector');
+            if (selector.value) {
+                currentStats.profile = TRACK_DB[selector.value];
+            } else {
+                currentStats.profile = TRACK_DB['default'];
+            }
+
+            updateStatsUI(currentStats);
+            generatePrompt(currentStats);
+        }
+
+        function analyzeDriving() {
+            const d = rawData;
+            let s = {
+                maxSpeed: 0,
+                minSpeed: 999,
+                coast: 0,
+                trail: 0,
+                noise: 0,
+                brakeNoise: 0,
+                time: d[d.length - 1]['Time']
+            };
+            let corners = [];
+
+            for (let i = 1; i < d.length; i++) {
+                let r = d[i];
+                let spd = r['Ground Speed'];
+                let thr = r['Throttle Pos'];
+                let brk = r['Brake Pos'];
+                let str = Math.abs(r['Steering']);
+
+                s.maxSpeed = Math.max(s.maxSpeed, spd);
+                if (spd > 30 && spd < s.minSpeed) s.minSpeed = spd;
+
+                if (thr < 5 && brk < 5 && spd > 50) s.coast++;
+                if (brk > 5 && str > 5) s.trail++;
+
+                if (thr > 10 && thr < 90) s.noise += Math.abs(thr - d[i - 1]['Throttle Pos']);
+                if (brk > 10 && brk < 90) s.brakeNoise += Math.abs(brk - d[i - 1]['Brake Pos']);
+
+                if (i > 20 && i < d.length - 20 && spd < 150 && spd < d[i - 10]['Ground Speed'] && spd < d[i + 10]['Ground Speed']) {
+                    if (!corners.length || r['Distance'] - corners[corners.length - 1].dist > 150) {
+                        corners.push({ dist: r['Distance'], speed: spd, brake: findMaxBrake(i) });
+                    }
+                }
+            }
+
+            s.coastPct = parseFloat((s.coast / d.length * 100).toFixed(1));
+            s.trailPct = parseFloat((s.trail / d.length * 100).toFixed(1));
+            s.smoothScore = Math.max(0, 100 - (s.noise / d.length * 200)).toFixed(0);
+            s.brakeSmoothScore = Math.max(0, 100 - (s.brakeNoise / d.length * 200)).toFixed(0);
+            s.slowCorners = corners.sort((a, b) => a.speed - b.speed).slice(0, 3);
+            if (s.minSpeed === 999) s.minSpeed = 0;
+
+            return s;
+        }
+
+        function findMaxBrake(idx) {
+            let max = 0;
+            for (let i = 0; i < 100; i++) if (rawData[idx - i]) max = Math.max(max, rawData[idx - i]['Brake Pos']);
+            return max;
+        }
+
+        function updateStatsUI(s) {
+            document.getElementById('val-time').innerText = s.time.toFixed(3);
+            document.getElementById('val-top').innerText = s.maxSpeed.toFixed(0);
+
+            // 滑行分析 (对比 DB 目标)
+            const coastEl = document.getElementById('val-coast');
+            const coastTargetEl = document.getElementById('target-coast');
+            coastEl.innerText = s.coastPct + '%';
+            coastTargetEl.innerText = `目标: ${s.profile.coast[0]}-${s.profile.coast[1]}%`;
+
+            // 动态判定颜色
+            if (s.coastPct > s.profile.coast[1] + 5) coastEl.style.color = colors.red;
+            else if (s.coastPct > s.profile.coast[1]) coastEl.style.color = colors.warn;
+            else coastEl.style.color = colors.green;
+
+            // 循迹分析 (对比 DB 目标)
+            const trailEl = document.getElementById('val-trail');
+            const trailTargetEl = document.getElementById('target-trail');
+            trailEl.innerText = s.trailPct + '%';
+            trailTargetEl.innerText = `目标: ${s.profile.trail[0]}-${s.profile.trail[1]}%`;
+
+            if (s.trailPct < s.profile.trail[0]) trailEl.style.color = colors.warn;
+            else trailEl.style.color = colors.green;
+
+            const smoothEl = document.getElementById('val-smooth');
+            smoothEl.innerText = s.smoothScore;
+            smoothEl.style.color = s.smoothScore < 60 ? colors.red : colors.green;
+
+            const brkSmoothEl = document.getElementById('val-brake-smooth');
+            brkSmoothEl.innerText = s.brakeSmoothScore;
+            brkSmoothEl.style.color = s.brakeSmoothScore < 60 ? colors.red : colors.green;
+        }
+
+        function generatePrompt(s) {
+            let cText = s.slowCorners.map((c, i) => `弯道${i + 1}(${Math.round(c.dist)}m):最低速${c.speed.toFixed(1)},刹车${c.brake.toFixed(0)}%`).join('\n');
+
+            promptText = `我是模拟车手，车型${meta.car}。
+赛道：【${s.profile.label}】(${s.profile.type}) - ${s.profile.desc}
+        
+【赛道基准参考】
+- 标杆圈速: ${s.profile.bench}
+- 推荐循迹刹车: ${s.profile.trail[0]}-${s.profile.trail[1]}%
+- 推荐滑行占比: ${s.profile.coast[0]}-${s.profile.coast[1]}%
+
+【我的核心数据】
+- 圈速: ${s.time.toFixed(3)} | 极速: ${s.maxSpeed.toFixed(0)}
+- 滑行占比: ${s.coastPct}%
+- 循迹刹车: ${s.trailPct}%
+- 平滑度评分: 油门 ${s.smoothScore} / 刹车 ${s.brakeSmoothScore}
+
+【最慢弯道】
+${cText}
+
+【请分析】
+1. 相比于标杆圈速 ${s.profile.bench}，我的时间主要损失在哪里？
+2. 结合该赛道的特性，我的循迹刹车和滑行数据是否合理？
+3. 给3个针对 ${meta.car} 在该赛道的提速建议。`.trim();
+        }
+
+        function renderCharts() {
+            const dist = rawData.map(d => d['Distance']);
+            const opts = { ...commonOptions, plugins: { zoom: getZoomOptions(), legend: { labels: { color: colors.text } } }, scales: { ...commonOptions.scales, x: { ...commonOptions.scales.x, max: maxDistance } } };
+
+            // 主图
+            if (charts.main) charts.main.destroy();
+            charts.main = new Chart(document.getElementById('mainChart'), {
+                type: 'line',
+                data: {
+                    labels: dist,
+                    datasets: [
+                        { label: 'Speed', data: rawData.map(d => d['Ground Speed']), borderColor: colors.cyan, borderWidth: 2, yAxisID: 'y' },
+                        { label: 'RPM', data: rawData.map(d => d['Engine RPM']), borderColor: 'rgba(255,255,255,0.15)', borderWidth: 1, fill: true, yAxisID: 'y1' },
+                        { label: 'Gear', data: rawData.map(d => d['Gear']), borderColor: colors.gold, borderWidth: 2, stepped: true, yAxisID: 'y2' }
+                    ]
+                },
+                options: {
+                    ...opts,
+                    scales: {
+                        ...opts.scales,
+                        y: { position: 'left', grid: { color: colors.grid }, ticks: { color: colors.text } },
+                        y1: { display: false, min: 0 },
+                        y2: { position: 'right', min: 0, max: 8, grid: { display: false }, ticks: { color: colors.gold } }
+                    }
+                }
+            });
+
+            // 输入图
+            if (charts.input) charts.input.destroy();
+            charts.input = new Chart(document.getElementById('inputChart'), {
+                type: 'line',
+                data: {
+                    labels: dist,
+                    datasets: [
+                        { label: 'Thr', data: rawData.map(d => d['Throttle Pos']), borderColor: colors.green, borderWidth: 1 },
+                        { label: 'Brk', data: rawData.map(d => d['Brake Pos']), borderColor: colors.red, borderWidth: 1 },
+                        { label: 'Str', data: rawData.map(d => d['Steering']), borderColor: '#9b59b6', borderWidth: 1 }
+                    ]
+                },
+                options: { ...opts, scales: { ...opts.scales, y: { min: 0, max: 105, grid: { color: colors.grid }, ticks: { color: colors.text } } } }
+            });
+
+            // 地图
+            if (charts.map) charts.map.destroy();
+            const lats = rawData.map(d => d['GPS Latitude']);
+            const avgLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+            mapRatio = Math.cos(avgLat * Math.PI / 180);
+            const mapData = rawData.map(d => ({ x: d['GPS Longitude'] * mapRatio, y: d['GPS Latitude'] }));
+
+            const throttlePoints = [];
+            const throttleColors = [];
+            const brakePoints = [];
+            const brakeColors = [];
+
+            rawData.forEach(d => {
+                const x = d['GPS Longitude'] * mapRatio;
+                const y = d['GPS Latitude'];
+
+                if (d['Throttle Pos'] > 10) {
+                    throttlePoints.push({ x, y });
+                    const intensity = d['Throttle Pos'];
+                    const l = 90 - (intensity / 100) * 50;
+                    throttleColors.push(`hsl(140, 70%, ${l}%)`);
+                }
+                if (d['Brake Pos'] > 10) {
+                    brakePoints.push({ x, y });
+                    const intensity = d['Brake Pos'];
+                    const l = 90 - (intensity / 100) * 50;
+                    brakeColors.push(`hsl(0, 80%, ${l}%)`);
+                }
+            });
+
+            let minX = Math.min(...mapData.map(d => d.x)), maxX = Math.max(...mapData.map(d => d.x));
+            let minY = Math.min(...mapData.map(d => d.y)), maxY = Math.max(...mapData.map(d => d.y));
+            let dataW = maxX - minX, dataH = maxY - minY;
+            const mapContainer = document.getElementById('mapChart').parentElement;
+            const aspect = mapContainer.clientWidth / mapContainer.clientHeight;
+            if (dataW / dataH > aspect) {
+                const newH = dataW / aspect;
+                const center = (minY + maxY) / 2;
+                minY = center - newH / 2; maxY = center + newH / 2;
+            } else {
+                const newW = dataH * aspect;
+                const center = (minX + maxX) / 2;
+                minX = center - newW / 2; maxX = center + newW / 2;
+            }
+            const padX = (maxX - minX) * 0.05, padY = (maxY - minY) * 0.05;
+
+            charts.map = new Chart(document.getElementById('mapChart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        { type: 'scatter', data: mapData, borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1, showLine: true, pointRadius: 0 },
+                        { type: 'scatter', data: throttlePoints, pointBackgroundColor: throttleColors, pointRadius: 2, borderWidth: 0 },
+                        { type: 'scatter', data: brakePoints, pointBackgroundColor: brakeColors, pointRadius: 3, borderWidth: 0 },
+                        { data: [], pointBackgroundColor: colors.cyan, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 6, showLine: false }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    scales: {
+                        x: { display: false, min: minX - padX, max: maxX + padX },
+                        y: { display: false, min: minY - padY, max: maxY + padY }
+                    },
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+
+            // GG
+            if (charts.gg) charts.gg.destroy();
+            const ggData = rawData.filter((_, i) => i % 5 === 0).map(d => ({ x: d['G Force Lat'], y: d['G Force Long'] }));
+            charts.gg = new Chart(document.getElementById('ggChart'), {
+                type: 'scatter',
+                data: { datasets: [{ data: ggData, backgroundColor: 'rgba(0, 191, 255, 0.4)', pointRadius: 1 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { min: -3, max: 3, grid: { color: colors.grid }, ticks: { color: colors.text } },
+                        y: { min: -3, max: 3, grid: { color: colors.grid }, ticks: { color: colors.text } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function askAI(platform) {
+            if (!promptText) { alert("请先导入数据"); return; }
+            navigator.clipboard.writeText(promptText).then(() => {
+                const w = Math.max(450, window.screen.width * 0.3);
+                const urls = { yuanbao: "https://yuanbao.tencent.com/chat", deepseek: "https://chat.deepseek.com/", kimi: "https://kimi.moonshot.cn/" };
+                window.open(urls[platform], 'AI', `width=${w},height=${window.screen.height},left=${window.screen.width - w},top=0`);
+            });
+        }
+    </script>
+</body>
+
+</html>
