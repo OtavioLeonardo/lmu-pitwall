@@ -2,13 +2,25 @@
     {
         "text": "赛道圈速全览",
         "link": "data/lmu_laptimes.html",
-        "tag": "OPEN",
+        "tag": "DATA",
         "isArchive": false
     },
     {
         "text": "燃油圈数计算表",
         "link": "data/lmu_fuel.html",
-        "tag": "OPEN",
+        "tag": "DATA",
+        "isArchive": false
+    },
+    {
+        "text": "赛道笔记编辑",
+        "link": "track_notes_editor.html",
+        "tag": "TOOL",
+        "isArchive": false
+    },
+    {
+        "text": "要测数据分析",
+        "link": "motec.html",
+        "tag": "TOOL",
         "isArchive": false
     }
 ]
