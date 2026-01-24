@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>赛道战术板 | Track Map Annotator</title>
 
     <link rel="stylesheet" href="css/race-theme.css">
@@ -12,45 +12,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* === 战术板专用样式 === */
-        body {
-            overflow: hidden;
-            /* 防止双滚动条 */
+        /* ========================================= */
+        /* === 基础样式 & 变量 === */
+        /* ========================================= */
+        :root {
+            --bg-core: #050505;
+            --bg-panel: #0f0f0f;
+            --bg-card: #141414;
+            --border-main: #333333;
+            --border-light: #444444;
+            --accent-gold: #FFD700;
+            --accent-cyan: #00BFFF;
+            --telemetry-gold: #FFD700;
+            --telemetry-cyan: #00BFFF;
         }
 
+        body {
+            overflow: hidden;
+            background-color: var(--bg-core);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            color: #d1d5db;
+        }
+
+        /* ========================================= */
+        /* === 桌面端默认布局 (Grid) === */
+        /* ========================================= */
         .app-layout {
             display: grid;
             grid-template-columns: 1fr 350px;
-            grid-template-rows: auto 1fr;
+            grid-template-rows: 50px 1fr;
+            /* 顶部导航固定高度 */
             height: 100vh;
             gap: 0;
         }
 
-        /* 移动端适配：单列布局 */
-        @media (max-width: 768px) {
-            .app-layout {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto 1fr auto;
-            }
-
-            .sidebar {
-                display: none;
-            }
-        }
-
-        /* 顶部导航 */
+        /* 顶部导航 (通用基础样式) */
         .top-bar {
             grid-column: 1 / -1;
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border-main);
-            padding: 10px 20px;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 20;
         }
 
-        /* 地图区域 (核心) */
+        /* 地图区域 */
         .map-stage {
             background-color: #1a1a1a;
             position: relative;
@@ -63,10 +71,8 @@
                 linear-gradient(var(--border-main) 1px, transparent 1px),
                 linear-gradient(90deg, var(--border-main) 1px, transparent 1px);
             background-size: 50px 50px;
-            /* 网格背景 */
         }
 
-        /* 赛道图片容器 */
         .map-container {
             position: relative;
             max-width: 95%;
@@ -79,9 +85,7 @@
             max-width: 100%;
             max-height: 80vh;
             pointer-events: none;
-            /* 让点击事件穿透图片到达 container */
             user-select: none;
-            /* 强制白色背景，适配透明 PNG */
             background-color: #ffffff;
             border-radius: 4px;
         }
@@ -90,7 +94,6 @@
         .map-pin {
             position: absolute;
             transform: translate(-50%, -50%);
-            /* 居中定位 */
             width: 28px;
             height: 28px;
             background: var(--accent-gold);
@@ -113,7 +116,6 @@
             z-index: 20;
         }
 
-        /* === 新增：侧边栏联动的高亮样式 === */
         .map-pin.active {
             transform: translate(-50%, -50%) scale(1.5);
             background: #990899;
@@ -123,7 +125,7 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
         }
 
-        /* 侧边数据栏 */
+        /* 侧边栏 */
         .sidebar {
             background: var(--bg-card);
             border-left: 1px solid var(--border-main);
@@ -136,6 +138,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 10px;
+            padding-bottom: 40px;
         }
 
         .data-card {
@@ -154,91 +157,141 @@
             border-color: var(--accent-gold);
         }
 
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
+        /* ========================================= */
+        /* === 移动端适配核心代码 (垂直布局 + 双行导航) === */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            .app-layout {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+                height: 100dvh;
+            }
 
-        .lbl {
-            color: var(--text-secondary);
-            font-size: 10px;
-            text-transform: uppercase;
-        }
+            /* [关键] 顶部导航：改为垂直列布局，防止按钮重叠 */
+            .top-bar {
+                flex: 0 0 auto;
+                height: auto;
+                /* 自适应高度 */
+                padding: 12px 16px;
+                flex-direction: column;
+                /* 垂直排列 */
+                align-items: flex-start;
+                gap: 12px;
+                /* 上下行间距 */
+                background: #0f0f0f;
+            }
 
-        .val {
-            color: var(--text-primary);
-            font-weight: bold;
-        }
+            /* 第一行：左侧内容撑满 */
+            .top-bar-left {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
 
-        .val-hl {
-            color: var(--accent-gold);
-        }
+            /* 第二行：右侧工具栏撑满 */
+            .top-bar-right {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                /* 按钮分散对齐 */
+                background: #1a1a1a;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: 1px solid #333;
+            }
 
-        /* 弹窗表单 */
-        #pinFormModal {
-            z-index: 100;
+            /* 标题截断防止撑开 */
+            .top-bar h1 {
+                font-size: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 200px;
+            }
+
+            /* 地图区域：固定高度 (约1/3屏幕) */
+            .map-stage {
+                flex: 0 0 35vh;
+                width: 100%;
+                border-bottom: 2px solid var(--accent-gold);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+                z-index: 10;
+            }
+
+            .track-image {
+                max-height: 30vh;
+            }
+
+            /* 侧边栏：占据剩余空间 (约2/3屏幕) */
+            .sidebar {
+                display: flex !important;
+                flex: 1;
+                width: 100%;
+                border-left: none;
+                background: #0a0a0a;
+            }
+
+            /* 弹窗宽度适配 */
+            #pinFormModal .bg-race-panel {
+                width: 90%;
+            }
         }
     </style>
 </head>
 
-<body class="text-gray-300 font-mono">
+<body>
 
     <div class="app-layout">
 
         <div class="top-bar">
-            <div class="flex items-center gap-4">
-
+            <div class="top-bar-left flex items-center gap-3 overflow-hidden">
                 <a href="index.html"
-                    class="group flex items-center gap-2 no-underline mr-2 transition-all opacity-80 hover:opacity-100"
-                    title="Back to Dashboard">
-                    <div
-                        class="flex items-center justify-center w-8 h-8 rounded border border-gray-600 bg-gray-900 group-hover:border-telemetry-gold group-hover:bg-gray-800 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4 text-gray-400 group-hover:text-telemetry-gold" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] text-gray-500 uppercase leading-none">Return to</span>
-                        <span class="text-xs font-bold text-gray-300 group-hover:text-white tracking-widest">HOME</span>
-                    </div>
+                    class="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded border border-gray-600 bg-gray-900 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
                 </a>
 
-                <div class="h-8 w-px bg-gray-800 mx-1"></div>
-
-                <h1 class="text-xl font-bold italic tracking-tighter text-white">
+                <h1 class="text-sm md:text-xl font-bold italic tracking-tighter text-white truncate">
                     <span class="text-telemetry-gold">///</span> <span id="trackNameDisplay">MAP_VIEW</span>
                 </h1>
 
-                <div class="text-xs px-2 py-1 rounded bg-black border border-gray-800" id="dataStatus">
+                <div class="hidden md:block text-xs px-2 py-1 rounded bg-black border border-gray-800 ml-4"
+                    id="dataStatus">
                     Checking Data...
                 </div>
             </div>
 
-            <div class="flex gap-3 text-xs items-center">
+            <div class="top-bar-right flex gap-2 text-xs items-center">
                 <button onclick="downloadJSON()"
-                    class="flex items-center gap-2 bg-telemetry-cyan text-white px-3 py-1 rounded font-bold hover:bg-white hover:text-black transition-colors">
+                    class="flex items-center gap-2 bg-telemetry-cyan text-white px-3 py-1.5 rounded font-bold hover:bg-white hover:text-black transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    SAVE JSON
+                    <span>SAVE</span>
                 </button>
 
-                <div class="h-4 w-px bg-gray-700 mx-1"></div>
+                <div class="hidden md:block h-4 w-px bg-gray-600 mx-1"></div>
 
                 <select id="trackSelect"
-                    class="bg-black border border-gray-700 text-xs p-1 rounded outline-none focus:border-blue-500 text-gray-400 max-w-[150px]">
-                    <option value="" disabled selected>Switch Track...</option>
+                    class="bg-black border border-gray-700 text-xs p-1.5 rounded outline-none focus:border-blue-500 text-gray-400 flex-grow md:flex-grow-0 md:w-40">
+                    <option value="" disabled selected>Select Track...</option>
                 </select>
 
-                <button onclick="toggleImageSource()" class="text-gray-500 hover:text-white underline ml-2">Map
-                    Image</button>
-                <button onclick="clearAllPins()" class="text-red-500 hover:text-red-400 underline ml-2">Clear</button>
+                <button onclick="clearAllPins()" class="text-red-500 hover:text-red-400 p-1 ml-1" title="Clear All">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -253,8 +306,9 @@
         </div>
 
         <div class="sidebar">
-            <div class="p-4 border-b border-race-border bg-race-panel flex justify-between items-center">
-                <h3 class="text-xs font-bold text-telemetry-cyan uppercase">Corner Telemetry</h3>
+            <div
+                class="p-3 border-b border-race-border bg-race-panel flex justify-between items-center sticky top-0 z-10">
+                <h3 class="text-xs font-bold text-telemetry-cyan uppercase">Corner Notes</h3>
                 <span id="pinCount" class="text-[10px] text-gray-500">0 ITEMS</span>
             </div>
             <div class="data-list" id="sidebarList">
@@ -263,8 +317,9 @@
 
     </div>
 
-    <div id="pinFormModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center">
-        <div class="bg-race-panel border border-race-border p-6 rounded shadow-2xl w-80">
+    <div id="pinFormModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-race-panel border border-race-border p-6 rounded shadow-2xl w-80 max-w-[90%]">
             <h3 class="text-white font-bold text-lg mb-4 flex items-center">
                 <span class="text-telemetry-gold mr-2">///</span> EDIT NODE
             </h3>
@@ -304,25 +359,25 @@
 
             <div class="grid grid-cols-2 gap-3 mt-6">
                 <button onclick="deleteCurrentPin()"
-                    class="text-red-500 text-xs hover:text-white uppercase font-bold border border-transparent hover:border-red-500 rounded">Delete</button>
+                    class="text-red-500 text-xs hover:text-white uppercase font-bold border border-transparent hover:border-red-500 rounded p-2">Delete</button>
                 <button onclick="savePinData()"
-                    class="bg-telemetry-cyan text-black font-bold py-2 rounded hover:bg-white transition-colors uppercase text-xs">Update
-                    Map</button>
+                    class="bg-telemetry-cyan text-black font-bold py-2 rounded hover:bg-white transition-colors uppercase text-xs">Update</button>
             </div>
+
+            <button onclick="closeModal()"
+                class="w-full mt-3 text-gray-600 text-xs hover:text-white text-center">Cancel</button>
         </div>
     </div>
 
     <script>
-        // === 全局变量 ===
         const urlParams = new URLSearchParams(window.location.search);
         let currentTrackId = urlParams.get('track');
 
         let pins = [];
         let activePinId = null;
         let tempClickCoords = null;
-        let allTracksData = []; // 存储完整的 data_tracks.json 数据
+        let allTracksData = [];
 
-        // === DOM 元素 ===
         const mapContainer = document.getElementById('mapContainer');
         const pinsLayer = document.getElementById('pinsLayer');
         const modal = document.getElementById('pinFormModal');
@@ -332,12 +387,9 @@
         const dataStatus = document.getElementById('dataStatus');
         const trackImage = document.getElementById('trackImage');
 
-        // === 初始化 ===
         async function init() {
-            // 1. 等待赛道列表配置加载完毕
             await loadTrackConfig();
 
-            // 2. 如果 URL 没参数，默认选列表第一个
             if (!currentTrackId && allTracksData.length > 0) {
                 currentTrackId = allTracksData[0].id;
                 updateUrlAndSelect(currentTrackId);
@@ -345,7 +397,6 @@
                 trackSelect.value = currentTrackId;
             }
 
-            // 3. 开始加载具体赛道的数据
             if (currentTrackId) {
                 updateTitle();
                 loadPinsFromJSON();
@@ -354,7 +405,6 @@
             mapContainer.addEventListener('click', handleMapClick);
         }
 
-        // === 辅助：同步状态 ===
         function updateUrlAndSelect(id) {
             const newUrl = new URL(window.location);
             newUrl.searchParams.set('track', id);
@@ -368,13 +418,12 @@
             trackTitle.innerText = displayName.toUpperCase();
         }
 
-        // === 核心逻辑 1：加载赛道列表配置 ===
         async function loadTrackConfig() {
             try {
                 const response = await fetch('json/data_tracks.json');
                 allTracksData = await response.json();
 
-                trackSelect.innerHTML = '<option value="" disabled selected>Switch Track...</option>';
+                trackSelect.innerHTML = '<option value="" disabled selected>Track...</option>';
                 allTracksData.forEach(t => {
                     const opt = document.createElement('option');
                     opt.value = t.id;
@@ -392,16 +441,15 @@
 
             } catch (e) {
                 console.log("Config load error", e);
-                dataStatus.innerHTML = `<span class="text-red-500">Config Error</span>`;
+                if (dataStatus) dataStatus.innerHTML = `<span class="text-red-500">Config Error</span>`;
             }
         }
 
-        // === 核心逻辑 2：加载具体赛道数据 ===
         async function loadPinsFromJSON() {
             const trackInfo = allTracksData.find(t => t.id === currentTrackId);
             const jsonPath = trackInfo && trackInfo.jsonFile ? trackInfo.jsonFile : `json/notes/${currentTrackId}.json`;
 
-            dataStatus.innerHTML = `<span class="text-yellow-500">Connecting...</span>`;
+            if (dataStatus) dataStatus.innerHTML = `<span class="text-yellow-500">Connecting...</span>`;
 
             pins = [];
             renderMap();
@@ -422,14 +470,14 @@
                         }
                     }
 
-                    dataStatus.innerHTML = `<span class="text-green-500">LINKED: ${currentTrackId}</span>`;
+                    if (dataStatus) dataStatus.innerHTML = `<span class="text-green-500">LINKED</span>`;
                     renderMap();
                     renderSidebar();
                 } else {
                     throw new Error("File not found");
                 }
             } catch (e) {
-                console.log("Remote load failed, checking local cache...");
+                console.log("Checking local cache...");
                 const localData = localStorage.getItem(`lmu_map_draft_${currentTrackId}`);
 
                 if (localData) {
@@ -441,31 +489,25 @@
                         if (parsed.mapImage) trackImage.src = parsed.mapImage;
                     }
 
-                    dataStatus.innerHTML = `<span class="text-orange-500">LOCAL DRAFT</span>`;
+                    if (dataStatus) dataStatus.innerHTML = `<span class="text-orange-500">LOCAL</span>`;
                     renderMap();
                     renderSidebar();
                 } else {
                     pins = [];
-                    dataStatus.innerHTML = `<span class="text-gray-500">NEW PROJECT</span>`;
+                    if (dataStatus) dataStatus.innerHTML = `<span class="text-gray-500">NEW</span>`;
                     renderSidebar();
                 }
             }
         }
 
-        // === 数据保存 (本地缓存) ===
         function saveToLocal() {
             const exportData = {
                 mapImage: trackImage.getAttribute('src'),
                 pins: pins
             };
             localStorage.setItem(`lmu_map_draft_${currentTrackId}`, JSON.stringify(exportData));
-
-            if (dataStatus.innerText.includes("LINKED")) {
-                dataStatus.innerHTML = `<span class="text-orange-500">MODIFIED (Please Save JSON)</span>`;
-            }
         }
 
-        // === 导出 JSON ===
         function downloadJSON() {
             const exportData = {
                 mapImage: trackImage.getAttribute('src'),
@@ -479,11 +521,8 @@
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
-
-            alert(`File downloaded: ${currentTrackId}.json\n\nPlease move this file to the configured folder (e.g. json/notes/) and push to GitHub.`);
         }
 
-        // === 地图交互 ===
         function handleMapClick(e) {
             if (e.target.classList.contains('map-pin')) return;
 
@@ -552,7 +591,7 @@
 
         function deleteCurrentPin() {
             if (activePinId) {
-                if (confirm('Delete this marker?')) {
+                if (confirm('Delete marker?')) {
                     pins = pins.filter(p => p.id !== activePinId);
                     saveToLocal();
                     renderMap();
@@ -568,7 +607,7 @@
         }
 
         function clearAllPins() {
-            if (confirm('Clear all markers? This cannot be undone.')) {
+            if (confirm('Clear all?')) {
                 pins = [];
                 saveToLocal();
                 renderMap();
@@ -576,23 +615,11 @@
             }
         }
 
-        function toggleImageSource() {
-            const currentSrc = trackImage.src.startsWith('data:') ? '' : trackImage.src;
-            const url = prompt("Enter Image URL for this track map:", currentSrc);
-            if (url) {
-                trackImage.src = url;
-                saveToLocal();
-            }
-        }
-
-        // === 渲染逻辑：地图 ===
         function renderMap() {
             pinsLayer.innerHTML = '';
             pins.forEach((p, index) => {
                 const el = document.createElement('div');
                 el.className = 'map-pin';
-
-                // === 新增：给 DOM 元素绑定 ID ===
                 el.id = 'pin-' + p.id;
 
                 el.style.left = p.x + '%';
@@ -603,17 +630,15 @@
                     e.stopPropagation();
                     openModal(p.id);
                 };
-                el.title = `Speed: ${p.minSpd} -> ${p.exitSpd}\n${p.note}`;
                 pinsLayer.appendChild(el);
             });
             document.getElementById('pinCount').innerText = `${pins.length} ITEMS`;
         }
 
-        // === 渲染逻辑：侧边栏 ===
         function renderSidebar() {
             sidebarList.innerHTML = '';
             if (pins.length === 0) {
-                sidebarList.innerHTML = '<div class="text-center text-xs text-gray-600 mt-10">Map is empty.<br>Click on map to add data.</div>';
+                sidebarList.innerHTML = '<div class="text-center text-xs text-gray-600 mt-10">Map is empty.<br>Tap map to add data.</div>';
                 return;
             }
 
@@ -621,51 +646,48 @@
                 const card = document.createElement('div');
                 card.className = 'data-card cursor-pointer group relative';
 
+                card.onclick = () => {
+                    highlightPin(p.id, true);
+                    setTimeout(() => openModal(p.id), 100);
+                };
+
                 card.onmouseenter = () => highlightPin(p.id, true);
                 card.onmouseleave = () => highlightPin(p.id, false);
-                card.onclick = () => openModal(p.id);
 
-                // 备注内容处理
                 const noteContent = p.note && p.note.trim() !== ''
                     ? p.note
-                    : '<span class="text-gray-600 italic">No specific notes added.</span>';
+                    : '<span class="text-gray-600 italic">No notes.</span>';
 
                 card.innerHTML = `
-                    <div class="flex justify-between items-center mb-3 border-b border-gray-800 pb-2">
-                        <span class="font-bold text-white text-sm">#${index + 1} CORNER</span>
-                        <span class="bg-gray-800 border border-gray-700 px-2 py-0.5 rounded text-telemetry-gold font-bold text-xs shadow-sm">
-                            GEAR ${p.gear}
+                    <div class="flex justify-between items-center mb-2 border-b border-gray-800 pb-1">
+                        <span class="font-bold text-white text-xs">#${index + 1} CORNER</span>
+                        <span class="bg-gray-800 border border-gray-700 px-2 rounded text-telemetry-gold font-bold text-[10px]">
+                            G ${p.gear}
                         </span>
                     </div>
 
-                    <div class="flex justify-between items-center mb-3 px-1">
+                    <div class="flex justify-between items-center mb-2 px-1">
                         <div class="text-center">
-                            <div class="lbl text-[10px] text-gray-500 mb-0.5">MIN SPEED</div>
-                            <div class="text-lg font-mono text-white leading-none">${p.minSpd}</div>
+                            <div class="lbl text-[9px] text-gray-500">MIN</div>
+                            <div class="text-sm font-mono text-white leading-none">${p.minSpd}</div>
                         </div>
                         
-                        <div class="text-gray-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </div>
+                        <div class="text-gray-600">→</div>
 
                         <div class="text-center">
-                            <div class="lbl text-[10px] text-gray-500 mb-0.5">EXIT SPEED</div>
-                            <div class="text-lg font-mono text-telemetry-cyan font-bold leading-none">${p.exitSpd}</div>
+                            <div class="lbl text-[9px] text-gray-500">EXIT</div>
+                            <div class="text-sm font-mono text-telemetry-cyan font-bold leading-none">${p.exitSpd}</div>
                         </div>
                     </div>
 
-                    <div class="bg-black/30 rounded p-2 border border-gray-800/50 mt-2">
-                        <div class="text-[10px] text-gray-400 uppercase mb-1 font-bold tracking-wider">Strategy Notes:</div>
-                        <div class="text-gray-200 text-xs leading-relaxed whitespace-pre-wrap font-sans">${noteContent}</div>
+                    <div class="bg-black/30 rounded p-1.5 border border-gray-800/50">
+                        <div class="text-gray-300 text-[11px] leading-tight whitespace-pre-wrap">${noteContent}</div>
                     </div>
                 `;
                 sidebarList.appendChild(card);
             });
         }
 
-        // === 新增：控制高亮的辅助函数 ===
         function highlightPin(pinId, isActive) {
             const pinEl = document.getElementById('pin-' + pinId);
             if (pinEl) {
@@ -678,7 +700,6 @@
         }
 
         init();
-
     </script>
 </body>
 
