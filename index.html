@@ -3,16 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LMU Pitwall</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LMU Pitwall | 模拟赛车指挥台</title>
 
-    <!-- 1. [新增] 引入 marked.js 用于解析 Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- 网站图标 -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏁</text></svg>">
 
@@ -37,21 +33,38 @@
     </script>
 
     <style>
-        ::-webkit-scrollbar {
-            width: 8px;
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #050505;
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px;
-        }
+        @media (min-width: 768px) {
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+            ::-webkit-scrollbar-track {
+                background: #050505;
+            }
+
+            ::-webkit-scrollbar-thumb {
+                background: #333;
+                border-radius: 4px;
+            }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+            /* [修改] 限制显示数量的逻辑只在电脑端(min-width: 768px)生效 */
+            /* 手机端直接显示全部，方便下滑 */
+            .limit-items>*:nth-child(n+6) {
+                display: none;
+            }
         }
 
         .scanline {
@@ -63,28 +76,11 @@
             right: 0;
             bottom: 0;
             pointer-events: none;
-            z-index: 40;
+            z-index: 30;
         }
 
-        .limit-items>*:nth-child(n+6) {
-            display: none;
-        }
-
-        .modal-enter {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-
-        .modal-enter-active {
-            opacity: 1;
-            transform: scale(1);
-            transition: all 0.2s ease-out;
-        }
-
-        /* 2. [新增] Markdown 内容的专属样式 (深色赛车风) */
         .markdown-body {
             font-family: 'system-ui', sans-serif;
-            /* 正文用无衬线体更易读 */
             color: #d4d4d4;
             line-height: 1.7;
         }
@@ -96,7 +92,6 @@
             margin-bottom: 0.8em;
             border-bottom: 1px solid #333;
             padding-bottom: 0.3em;
-            letter-spacing: -0.02em;
         }
 
         .markdown-body h2 {
@@ -126,37 +121,6 @@
             color: #a3a3a3;
         }
 
-        .markdown-body ol {
-            list-style: decimal;
-            padding-left: 1.5em;
-            margin-bottom: 1em;
-            color: #a3a3a3;
-        }
-
-        .markdown-body li {
-            margin-bottom: 0.3em;
-        }
-
-        .markdown-body strong {
-            color: #fff;
-            font-weight: 600;
-        }
-
-        .markdown-body em {
-            color: #00BFFF;
-            font-style: italic;
-        }
-
-        .markdown-body blockquote {
-            border-left: 4px solid #FFD700;
-            padding-left: 1em;
-            margin: 1.5em 0;
-            color: #888;
-            font-style: italic;
-            background: rgba(255, 215, 0, 0.05);
-            padding: 10px;
-        }
-
         .markdown-body code {
             background: #222;
             color: #FFD700;
@@ -181,10 +145,10 @@
             color: #ccc;
         }
 
-        .markdown-body hr {
-            border: 0;
-            border-top: 1px solid #333;
-            margin: 2em 0;
+        .markdown-body a {
+            color: #00BFFF;
+            text-decoration: underline;
+            text-underline-offset: 4px;
         }
 
         .markdown-body img {
@@ -194,50 +158,64 @@
             margin: 1em 0;
         }
 
-        .markdown-body a {
-            color: #00BFFF;
-            text-decoration: underline;
-            text-underline-offset: 4px;
+        .markdown-body blockquote {
+            border-left: 4px solid #FFD700;
+            padding-left: 1em;
+            margin: 1.5em 0;
+            color: #888;
+            font-style: italic;
+            background: rgba(255, 215, 0, 0.05);
+            padding: 10px;
         }
 
-        .markdown-body a:hover {
-            color: #fff;
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 
 <body
-    class="bg-race-bg text-gray-300 font-mono min-h-screen p-4 md:p-8 selection:bg-telemetry-cyan selection:text-black relative">
+    class="bg-race-bg text-gray-300 font-mono min-h-screen selection:bg-telemetry-cyan selection:text-black relative pb-24 md:pb-8">
 
-    <!-- 顶部状态栏 -->
     <header
-        class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 border-b border-race-border pb-4 z-10 relative">
+        class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 md:mb-6 border-b border-race-border p-4 md:px-8 pt-6 z-10 relative bg-race-bg/95 backdrop-blur-sm sticky top-0">
         <div>
-            <h1 class="text-3xl md:text-4xl font-bold tracking-tighter text-white uppercase italic">
+            <h1 class="text-2xl md:text-4xl font-bold tracking-tighter text-white uppercase italic">
                 <span class="text-telemetry-gold">///</span> LMU PITWALL
             </h1>
-            <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Le Mans Ultimate Telemetry & Logistics</p>
+            <p class="text-[10px] md:text-xs text-gray-500 mt-1 uppercase tracking-widest">Le Mans Ultimate Telemetry &
+                Logistics</p>
         </div>
-        <div class="mt-4 md:mt-0 flex gap-4 text-xs font-bold">
+        <div class="mt-2 md:mt-0 flex gap-4 text-xs font-bold w-full md:w-auto justify-between md:justify-start">
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <span class="text-green-500">SYSTEM ONLINE</span>
+                <span class="text-green-500">ONLINE</span>
             </div>
-            <div class="text-gray-500">SESSION: <span class="text-telemetry-cyan">MD_READY</span></div>
+            <div class="text-gray-500">MODE: <span class="text-telemetry-cyan" id="display-mode">MOBILE</span></div>
         </div>
     </header>
 
-    <main class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto z-10 relative">
+    <main class="max-w-7xl mx-auto z-10 relative px-4 md:px-8 block md:grid md:grid-cols-2 gap-6">
 
-        <!-- [01] LOCAL DATA -->
-        <section
-            class="bg-race-panel border border-race-border p-5 rounded-sm shadow-lg hover:border-gray-500 transition-colors duration-300 flex flex-col h-full">
+        <section id="tab-local"
+            class="mobile-tab md:!block bg-transparent md:bg-race-panel md:border md:border-race-border p-0 md:p-5 rounded-sm md:shadow-lg md:hover:border-gray-500 transition-colors duration-300 flex flex-col h-full fade-in">
             <div onclick="openModal('LOCAL_DATA', 'list-data')"
-                class="flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
+                class="hidden md:flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
                 <h2
                     class="text-telemetry-cyan font-bold uppercase tracking-widest text-sm group-hover:text-white transition-colors">
-                    [01] LOCAL_DATA <span class="text-xs text-gray-600 group-hover:text-telemetry-gold ml-2">//
-                        点击查看全部</span>
+                    [01] LOCAL_DATA
                 </h2>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600 group-hover:text-white" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
@@ -250,15 +228,13 @@
             </ul>
         </section>
 
-        <!-- [02] EXTERNAL TOOLS -->
-        <section
-            class="bg-race-panel border border-race-border p-5 rounded-sm shadow-lg hover:border-gray-500 transition-colors duration-300 flex flex-col h-full">
+        <section id="tab-tools"
+            class="mobile-tab hidden md:!block bg-transparent md:bg-race-panel md:border md:border-race-border p-0 md:p-5 rounded-sm md:shadow-lg md:hover:border-gray-500 transition-colors duration-300 flex flex-col h-full fade-in">
             <div onclick="openModal('EXTERNAL_TOOLS', 'list-tools')"
-                class="flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
+                class="hidden md:flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
                 <h2
                     class="text-telemetry-cyan font-bold uppercase tracking-widest text-sm group-hover:text-white transition-colors">
-                    [02] EXTERNAL_TOOLS <span class="text-xs text-gray-600 group-hover:text-telemetry-gold ml-2">//
-                        点击查看全部</span>
+                    [02] EXTERNAL_TOOLS
                 </h2>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600 group-hover:text-white" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
@@ -269,15 +245,13 @@
             <div id="list-tools" class="space-y-4 limit-items text-xs text-gray-500 italic">Loading JSON data...</div>
         </section>
 
-        <!-- [03] TRACK NOTES -->
-        <section
-            class="bg-race-panel border border-race-border p-5 rounded-sm shadow-lg hover:border-gray-500 transition-colors duration-300 flex flex-col h-full">
+        <section id="tab-notes"
+            class="mobile-tab hidden md:!block bg-transparent md:bg-race-panel md:border md:border-race-border p-0 md:p-5 rounded-sm md:shadow-lg md:hover:border-gray-500 transition-colors duration-300 flex flex-col h-full fade-in">
             <div onclick="openModal('TRACK_NOTES', 'list-notes')"
-                class="flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
+                class="hidden md:flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
                 <h2
                     class="text-telemetry-cyan font-bold uppercase tracking-widest text-sm group-hover:text-white transition-colors">
-                    [03] TRACK_NOTES <span class="text-xs text-gray-600 group-hover:text-telemetry-gold ml-2">//
-                        点击查看全部</span>
+                    [03] TRACK_NOTES
                 </h2>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600 group-hover:text-white" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
@@ -289,15 +263,13 @@
                 data...</div>
         </section>
 
-        <!-- [04] DEBRIEF LOG (支持 Markdown) -->
-        <section
-            class="bg-race-panel border border-race-border p-5 rounded-sm shadow-lg hover:border-gray-500 transition-colors duration-300 flex flex-col h-full">
+        <section id="tab-log"
+            class="mobile-tab hidden md:!block bg-transparent md:bg-race-panel md:border md:border-race-border p-0 md:p-5 rounded-sm md:shadow-lg md:hover:border-gray-500 transition-colors duration-300 flex flex-col h-full fade-in">
             <div onclick="openModal('DEBRIEF_LOG', 'list-logs')"
-                class="flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
+                class="hidden md:flex justify-between items-center mb-4 border-b border-race-border pb-2 cursor-pointer group hover:bg-white/5 p-2 -mx-2 rounded transition-colors">
                 <h2
                     class="text-telemetry-cyan font-bold uppercase tracking-widest text-sm group-hover:text-white transition-colors">
-                    [04] DEBRIEF_LOG <span class="text-xs text-gray-600 group-hover:text-telemetry-gold ml-2">//
-                        点击查看全部</span>
+                    [04] DEBRIEF_LOG
                 </h2>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600 group-hover:text-white" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor">
@@ -310,13 +282,13 @@
                     <thead>
                         <tr class="text-xs text-gray-600 border-b border-gray-800">
                             <th class="pb-2 font-normal uppercase">Date</th>
-                            <th class="pb-2 font-normal uppercase">Entry Title</th>
-                            <th class="pb-2 font-normal text-right">Class</th>
+                            <th class="pb-2 font-normal uppercase">Title</th>
+                            <th class="pb-2 font-normal text-right">Cls</th>
                         </tr>
                     </thead>
                     <tbody id="list-logs" class="text-sm limit-items">
                         <tr>
-                            <td colspan="3" class="text-xs text-gray-500 italic py-2">Loading JSON data...</td>
+                            <td colspan="3" class="text-xs text-gray-500 italic py-2">Loading...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -325,37 +297,92 @@
 
     </main>
 
-    <footer class="text-center mt-12 text-gray-700 text-xs uppercase tracking-widest pb-6 relative z-10">
-        <p>Telemetry System v2.1 // Click Headers to Expand</p>
+    <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-race-border md:hidden z-40 pb-safe">
+        <div class="flex justify-between items-center px-6 py-3">
+            <button onclick="switchTab('local')" class="nav-btn group flex flex-col items-center gap-1 w-1/4"
+                data-target="local">
+                <div class="icon-container text-telemetry-cyan transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                    </svg>
+                </div>
+                <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-white group-hover:text-telemetry-gold">Data</span>
+            </button>
+
+            <button onclick="switchTab('tools')" class="nav-btn group flex flex-col items-center gap-1 w-1/4"
+                data-target="tools">
+                <div class="icon-container text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-telemetry-gold">Tools</span>
+            </button>
+
+            <button onclick="switchTab('notes')" class="nav-btn group flex flex-col items-center gap-1 w-1/4"
+                data-target="notes">
+                <div class="icon-container text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0121 18.382V7.618a1 1 0 01-.806-.984A11.375 11.375 0 0121 7.618l-4.553-2.276M15 17V7m0 10a2 2 0 100 4 2 2 0 000-4zm0-10a2 2 0 100-4 2 2 0 000 4z" />
+                    </svg>
+                </div>
+                <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-telemetry-gold">Track</span>
+            </button>
+
+            <button onclick="switchTab('log')" class="nav-btn group flex flex-col items-center gap-1 w-1/4"
+                data-target="log">
+                <div class="icon-container text-gray-600 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                </div>
+                <span
+                    class="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-telemetry-gold">Logs</span>
+            </button>
+        </div>
+    </nav>
+
+    <footer class="text-center mt-8 text-gray-700 text-xs uppercase tracking-widest pb-6 relative z-10">
+        <p>Telemetry System v2.3 // <span class="hidden md:inline">Desktop Grid</span><span class="md:hidden">Mobile
+                Deck</span></p>
     </footer>
 
     <div class="scanline"></div>
 
-    <!-- 弹窗 1: 通用列表弹窗 -->
     <div id="data-modal"
         class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-12 transition-opacity duration-300">
         <div class="bg-race-bg border border-race-border w-full max-w-4xl max-h-full flex flex-col shadow-2xl relative">
-            <div class="flex justify-between items-center p-6 border-b border-race-border bg-race-panel">
+            <div class="flex justify-between items-center p-4 md:p-6 border-b border-race-border bg-race-panel">
                 <div>
-                    <h2 id="modal-title" class="text-2xl text-white font-bold uppercase italic tracking-tighter">
+                    <h2 id="modal-title"
+                        class="text-xl md:text-2xl text-white font-bold uppercase italic tracking-tighter">
                         <span class="text-telemetry-gold">///</span> FULL_LOG
                     </h2>
-                    <p class="text-xs text-telemetry-cyan mt-1 uppercase tracking-widest">Archive Access Granted</p>
+                    <p class="text-xs text-telemetry-cyan mt-1 uppercase tracking-widest">Archive Access</p>
                 </div>
-                <button onclick="closeModal()"
-                    class="text-gray-500 hover:text-white transition-colors p-2 hover:bg-red-900/30 rounded border border-transparent hover:border-red-500/50">
-                    <span class="text-xs font-bold uppercase mr-2">CLOSE [ESC]</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24"
+                <button onclick="closeModal()" class="text-gray-500 hover:text-white transition-colors p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <div class="p-6 overflow-y-auto flex-1 bg-black/50">
-                <div id="modal-content-area" class="space-y-4">
-                    <!-- Dynamic Content -->
-                </div>
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 bg-black/50">
+                <div id="modal-content-area" class="space-y-4"></div>
             </div>
             <div class="p-3 border-t border-race-border bg-race-panel text-right">
                 <span class="text-xs text-gray-600 font-mono">END OF LOG //</span>
@@ -363,33 +390,25 @@
         </div>
     </div>
 
-    <!-- 弹窗 2: [新增] Markdown 阅读器弹窗 -->
     <div id="reader-modal"
         class="fixed inset-0 z-50 hidden bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 transition-opacity duration-300">
         <div class="bg-race-bg border border-race-border w-full max-w-3xl max-h-full flex flex-col shadow-2xl relative">
-            <!-- 阅读器顶部 -->
             <div
-                class="flex justify-between items-center p-5 border-b border-race-border bg-race-panel sticky top-0 z-10">
+                class="flex justify-between items-center p-4 md:p-5 border-b border-race-border bg-race-panel sticky top-0 z-10">
                 <div class="pr-4 flex-1">
                     <h2 id="reader-title"
-                        class="text-lg md:text-xl text-white font-bold uppercase italic tracking-tighter truncate">
-                        <!-- JS 填充标题 -->
-                    </h2>
-                    <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">DEBRIEF_LOG // MARKDOWN_VIEWER</p>
+                        class="text-lg md:text-xl text-white font-bold uppercase italic tracking-tighter truncate"></h2>
+                    <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">DEBRIEF_LOG // MARKDOWN</p>
                 </div>
-                <button onclick="closeReader()"
-                    class="text-gray-500 hover:text-white hover:bg-red-900/30 p-2 rounded transition-colors shrink-0 border border-transparent hover:border-red-500/50">
-                    <span class="text-xs font-bold uppercase mr-2 hidden md:inline">CLOSE [ESC]</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline" fill="none" viewBox="0 0 24 24"
+                <button onclick="closeReader()" class="text-gray-500 hover:text-white p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <!-- 阅读器内容 -->
-            <div class="p-6 overflow-y-auto flex-1 bg-black/50">
-                <!-- 文章内容将会渲染在这里 -->
+            <div class="p-4 md:p-6 overflow-y-auto flex-1 bg-black/50">
                 <div id="reader-content" class="markdown-body"></div>
             </div>
         </div>
@@ -407,7 +426,7 @@
                 renderFunction(data, container);
             } catch (e) {
                 console.error("Loading failed:", e);
-                container.innerHTML = `<div class="text-red-500 text-xs">OFFLINE / LOAD_FAIL: ${url}</div>`;
+                container.innerHTML = `<div class="text-red-500 text-xs">OFFLINE / LOAD_FAIL</div>`;
             }
         }
 
@@ -440,20 +459,13 @@
             });
         }
 
-        // [修改] renderTracks: 增加视频链接按钮支持
         function renderTracks(data, container) {
             data.forEach(t => {
-                // 1. 改用 div 作为容器，以便处理嵌套链接
                 const div = document.createElement('div');
-                div.className = "relative group block"; // relative 用于定位内部的绝对定位链接
-
-                // 2. 准备视频按钮 HTML (检查 json 中是否有 videoLink)
-                // 使用 z-20 确保按钮位于卡片覆盖链接之上
-                // onclick="event.stopPropagation()" 防止点击视频时触发卡片跳转
+                div.className = "relative group block";
                 const videoBtn = t.videoLink ? `
             <a href="${t.videoLink}" target="_blank"
                class="relative z-20 flex items-center justify-center w-6 h-6 text-gray-600 bg-gray-800/80 rounded hover:bg-red-600 hover:text-white transition-all duration-200"
-               title="观看参考视频 (Bilibili)"
                onclick="event.stopPropagation()">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
@@ -461,59 +473,90 @@
             </a>
         ` : '';
 
-                // 3. 构建卡片内容
                 div.innerHTML = `
             <div class="flex items-center gap-4 bg-gray-900/50 p-3 border border-race-border group-hover:border-telemetry-cyan transition-all">
                 <div class="text-2xl grayscale group-hover:grayscale-0 transition-all">${t.icon}</div>
-                
                 <div class="flex-1 min-w-0">
                     <h3 class="font-bold text-white text-sm group-hover:text-telemetry-cyan truncate">${t.track}</h3>
                     <p class="text-xs text-gray-500 mt-1 truncate">${t.note}</p>
                 </div>
-
                 <div class="ml-auto flex items-center gap-3">
                     ${videoBtn}
                     <div class="text-xs text-gray-700 font-bold group-hover:text-telemetry-cyan">>>></div>
                 </div>
             </div>
-            
-            <a href="${t.link}" class="absolute inset-0 z-10" aria-label="Open Track Notes"></a>
+            <a href="${t.link}" class="absolute inset-0 z-10"></a>
         `;
                 container.appendChild(div);
             });
         }
 
-        // [修改] renderLogs: 现在点击会打开 Markdown 阅读器
         function renderLogs(data, container) {
             data.forEach(log => {
                 const tr = document.createElement('tr');
                 tr.className = "group hover:bg-white/5 cursor-pointer transition-colors border-b border-gray-800/50";
-                // 点击时调用 openReader，传入 markdown 文件的路径和标题
                 tr.onclick = () => openReader(log.link, log.title);
                 tr.innerHTML = `
                     <td class="py-3 text-gray-500 font-bold text-xs">${log.date}</td>
-                    <td class="py-3 pl-2 text-gray-300 group-hover:text-telemetry-gold">${log.title}</td>
+                    <td class="py-3 pl-2 text-gray-300 group-hover:text-telemetry-gold truncate max-w-[150px]">${log.title}</td>
                     <td class="py-3 text-right text-xs text-gray-600">${log.class}</td>
                 `;
                 container.appendChild(tr);
             });
         }
 
-        // 3. 初始化
+        // 初始化
         window.addEventListener('DOMContentLoaded', () => {
             loadJSON('json/data_local.json', 'list-data', renderLocal);
             loadJSON('json/data_tools.json', 'list-tools', renderTools);
             loadJSON('json/data_tracks.json', 'list-notes', renderTracks);
             loadJSON('json/data_logs.json', 'list-logs', renderLogs);
+
+            if (window.innerWidth >= 768) {
+                document.getElementById('display-mode').innerText = "DESKTOP_GRID";
+                document.getElementById('display-mode').className = "text-telemetry-gold";
+            }
         });
 
-        // 4. 通用列表弹窗逻辑
+        // Tab 切换逻辑
+        function switchTab(tabName) {
+            document.querySelectorAll('.mobile-tab').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+
+            const selected = document.getElementById('tab-' + tabName);
+            if (selected) {
+                selected.classList.remove('hidden');
+                selected.classList.add('block');
+            }
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const icon = btn.querySelector('.icon-container');
+                const text = btn.querySelector('span');
+
+                if (btn.dataset.target === tabName) {
+                    icon.classList.remove('text-gray-600');
+                    icon.classList.add('text-telemetry-cyan');
+                    text.classList.remove('text-gray-500');
+                    text.classList.add('text-white');
+                } else {
+                    icon.classList.remove('text-telemetry-cyan');
+                    icon.classList.add('text-gray-600');
+                    text.classList.remove('text-white');
+                    text.classList.add('text-gray-500');
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        // 弹窗逻辑
         const modal = document.getElementById('data-modal');
         const modalTitle = document.getElementById('modal-title');
         const modalContent = document.getElementById('modal-content-area');
 
         function openModal(title, sourceId) {
-            modalTitle.innerHTML = `<span class="text-telemetry-gold">///</span> ${title}_FULL_VIEW`;
+            modalTitle.innerHTML = `<span class="text-telemetry-gold">///</span> ${title}`;
             const sourceElement = document.getElementById(sourceId);
             if (sourceElement) {
                 const contentClone = sourceElement.cloneNode(true);
@@ -521,7 +564,7 @@
                 if (sourceElement.tagName === 'TBODY') {
                     const wrapperTable = document.createElement('table');
                     wrapperTable.className = 'w-full text-left border-collapse';
-                    wrapperTable.innerHTML = `<thead><tr class="text-xs text-gray-600 border-b border-gray-800"><th class="pb-2 font-normal uppercase">Date</th><th class="pb-2 font-normal uppercase">Entry Title</th><th class="pb-2 font-normal text-right">Class</th></tr></thead>`;
+                    wrapperTable.innerHTML = `<thead><tr class="text-xs text-gray-600 border-b border-gray-800"><th class="pb-2 font-normal uppercase">Date</th><th class="pb-2 font-normal uppercase">Entry</th><th class="pb-2 font-normal text-right">Cls</th></tr></thead>`;
                     wrapperTable.appendChild(contentClone);
                     modalContent.innerHTML = '';
                     modalContent.appendChild(wrapperTable);
@@ -531,38 +574,29 @@
                 }
             }
             modal.classList.remove('hidden');
-            modal.querySelector('div').classList.add('modal-enter-active');
         }
 
         function closeModal() {
             modal.classList.add('hidden');
         }
 
-        // 5. [新增] Markdown 阅读器逻辑
+        // Reader 逻辑
         async function openReader(fileUrl, title) {
             const readerModal = document.getElementById('reader-modal');
             const contentBox = document.getElementById('reader-content');
             const titleBox = document.getElementById('reader-title');
 
-            // 设置标题
             titleBox.textContent = title || 'LOG ENTRY';
-
-            // 显示加载状态
-            contentBox.innerHTML = '<div class="text-gray-500 animate-pulse font-mono">Initializing Decryption... (Fetching Data)</div>';
-
-            // 打开弹窗
+            contentBox.innerHTML = '<div class="text-gray-500 animate-pulse font-mono mt-10 text-center">DECRYPTING DATA STREAM...</div>';
             readerModal.classList.remove('hidden');
 
             try {
-                // 抓取 Markdown 文件内容
                 const response = await fetch(fileUrl);
                 if (!response.ok) throw new Error('File not found');
                 const text = await response.text();
-
-                // 使用 marked.js 解析并显示
                 contentBox.innerHTML = marked.parse(text);
             } catch (err) {
-                contentBox.innerHTML = `<div class="text-red-500 font-mono">ERROR: UNABLE TO READ DATA LOG.<br>Please check file path: ${fileUrl}</div>`;
+                contentBox.innerHTML = `<div class="text-red-500 font-mono text-center mt-10">ERROR: DATA CORRUPTED OR MISSING.<br>${fileUrl}</div>`;
             }
         }
 
@@ -570,15 +604,10 @@
             document.getElementById('reader-modal').classList.add('hidden');
         }
 
-        // ESC 键关闭所有弹窗
         document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") {
-                closeModal();
-                closeReader();
-            }
+            if (e.key === "Escape") { closeModal(); closeReader(); }
         });
 
-        // 点击背景关闭
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
         document.getElementById('reader-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('reader-modal')) closeReader();
