@@ -1,5 +1,13 @@
 [
     {
+        "id": "spa",
+        "track": "Spa-Francorchamps",
+        "note": "LMU // 高速起伏的赛道，胆量与节奏的考验",
+        "icon": "🇧🇪",
+        "link": "track_notes_editor.html?track=spa",
+        "videoLink": "https://www.bilibili.com/video/BV1jPYszYEUt?vd_source=9e823bbaf059e4bf21d2e8ad9055bdee"
+    },
+    {
         "id": "sebring",
         "track": "Sebring International Raceway",
         "note": "LMU // 颠簸路段的极致控制考验",
